@@ -1,0 +1,14 @@
+{
+  "name": "AM Daily Review | Vishal Mega Mart",
+  "short_name": "AM Review",
+  "description": "Operational Discipline Framework – AM Daily Review",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0D2D6B",
+  "background_color": "#0D2D6B",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
