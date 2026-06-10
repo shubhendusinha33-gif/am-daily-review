@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Daily Discipline Review – VMM Central Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1565C0;--blue-d:#0D47A1;--blue-l:#1976D2;--blue-ll:#E3F2FD;--blue-lll:#BBDEFB;
+  --pink:#E91E8C;--pink-d:#C2185B;--pink-l:#F06292;
+  --green:#2E7D32;--green-l:#43A047;--green-bg:#E8F5E9;
+  --red:#C62828;--red-l:#E53935;--red-bg:#FFEBEE;
+  --amber:#E65100;--amber-l:#FB8C00;--amber-bg:#FFF3E0;
+  --gray:#757575;--gray-l:#BDBDBD;--gray-bg:#F5F5F5;--gray-bg2:#FAFAFA;
+  --white:#fff;--bg:#F0F2F5;--border:#E0E0E0;--border2:#EEEEEE;
+  --text:#212121;--text2:#616161;--text3:#9E9E9E;
+  --shadow:0 2px 8px rgba(0,0,0,.12);--shadow2:0 4px 20px rgba(0,0,0,.15);
+  --radius:8px;--radius-sm:4px;--radius-lg:14px;
+  --sidebar:220px;--topbar:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Roboto",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-decoration:none}
+.hidden{display:none!important}
+.mono{font-family:monospace}
+.text2{color:var(--text2)}.text3{color:var(--text3)}
+.small{font-size:12px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}
+.flex{display:flex}.between{justify-content:space-between}.center{align-items:center}.gap{gap:10px}.wrap{flex-wrap:wrap}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 18px;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;letter-spacing:.3px;cursor:pointer;transition:opacity .2s,transform .1s;white-space:nowrap;font-family:inherit}
+.btn:hover{opacity:.9}.btn:active{transform:scale(.98)}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-pink{background:var(--pink);color:#fff}
+.btn-green{background:var(--green-l);color:#fff}
+.btn-red{background:var(--red-l);color:#fff}
+.btn-amber{background:var(--amber-l);color:#fff}
+.btn-purple{background:#7B1FA2;color:#fff}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-xs{padding:3px 9px;font-size:11px}
+.btn-lg{padding:13px 28px;font-size:15px;font-weight:700;border-radius:var(--radius)}
+.btn-full{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:11px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-blue{background:var(--blue-ll);color:var(--blue)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-pink{background:#FCE4EC;color:var(--pink)}
+.badge-gray{background:var(--gray-bg);color:var(--gray)}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px}
+.card-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;min-height:48px;gap:10px;flex-wrap:wrap}
+.card-title{font-size:14px;font-weight:700;color:var(--text)}
+.card-body{padding:18px}
+
+/* FORMS */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:500;margin-bottom:5px;color:var(--text2)}
+.form-control{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;transition:border-color .2s;background:#fff;color:var(--text);font-family:inherit}
+.form-control:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(21,101,192,.1)}
+textarea.form-control{resize:vertical;min-height:70px}
+select.form-control{cursor:pointer}
+
+/* TOGGLE */
+.tgl{position:relative;display:inline-block;width:42px;height:23px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgl-sl{position:absolute;cursor:pointer;inset:0;background:#CCC;border-radius:23px;transition:.3s}
+.tgl-sl::before{content:"";position:absolute;width:17px;height:17px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.tgl input:checked+.tgl-sl{background:var(--green-l)}
+.tgl input:checked+.tgl-sl::before{transform:translateX(19px)}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{padding:10px 14px;background:#F8F9FA;border:1px solid var(--border);font-weight:500;text-align:left;white-space:nowrap;color:var(--text2)}
+.tbl td{padding:10px 14px;border:1px solid var(--border);vertical-align:middle}
+.tbl tbody tr:hover td{background:#FAFFFE}
+
+/* TABS */
+.tab-bar{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto}
+.tab-btn{padding:10px 20px;border:none;background:none;font-size:13px;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:.2s;white-space:nowrap;font-family:inherit}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* INFO BOXES */
+.info-box{background:var(--blue-ll);border-left:4px solid var(--blue);padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--blue-d);margin-bottom:14px;line-height:1.6}
+.warn-box{background:var(--amber-bg);border-left:4px solid var(--amber-l);padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--amber);margin-bottom:14px;line-height:1.6}
+.success-box{background:var(--green-bg);border-left:4px solid var(--green-l);padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--green);margin-bottom:14px;line-height:1.6}
+
+/* ADMIN LAYOUT */
+.admin-wrap{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--blue);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:300;transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.sb-logo{background:var(--blue-d);padding:0 16px;display:flex;align-items:center;gap:10px;min-height:var(--topbar);border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo-txt{color:#fff;font-size:16px;font-weight:900;letter-spacing:.3px;line-height:1.1}
+.sb-logo-txt span{color:var(--pink-l)}
+.sb-user{padding:12px 16px;background:rgba(0,0,0,.15);border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-user-name{color:#fff;font-weight:700;font-size:13px}
+.sb-user-role{color:rgba(255,255,255,.5);font-size:11px;margin-top:1px}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0}
+.sb-section{padding:16px 18px 5px;color:rgba(255,255,255,.35);font-size:10px;text-transform:uppercase;letter-spacing:1.4px;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 18px;color:rgba(255,255,255,.78);cursor:pointer;transition:.18s;font-size:13px;border-left:3px solid transparent;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:var(--pink);color:#fff;border-left-color:rgba(255,255,255,.6);font-weight:500}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-footer{padding:10px 16px;font-size:10px;color:rgba(255,255,255,.22);border-top:1px solid rgba(255,255,255,.06);line-height:1.6}
+.main-content{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:var(--topbar);background:#fff;display:flex;align-items:center;padding:0 22px;box-shadow:0 1px 3px rgba(0,0,0,.1);position:sticky;top:0;z-index:100;gap:12px}
+.topbar-title{font-size:15px;font-weight:500;color:var(--text);flex:1}
+.topbar-date{font-size:12px;color:var(--text2)}
+.page-body{padding:22px;flex:1}
+.a-page{display:none}
+.a-page.active{display:block}
+.hamburger{display:none;background:none;border:none;font-size:22px;cursor:pointer;margin-right:8px;color:var(--text2)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299}
+.sb-overlay.show{display:block}
+
+/* FILTER ROW */
+.filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.filter-lbl{font-size:12px;color:var(--text2);white-space:nowrap}
+.filter-input{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;background:#fff;font-family:inherit}
+.filter-input:focus{border-color:var(--blue)}
+
+/* STATS BAR */
+.stats-bar{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:#fff;margin-bottom:18px;box-shadow:var(--shadow)}
+.stat-cell{flex:1;padding:16px 12px;text-align:center;border-right:1px solid var(--border);cursor:default;transition:background .15s}
+.stat-cell:last-child{border-right:none}
+.stat-cell.clickable{cursor:pointer}
+.stat-cell.clickable:hover{background:var(--gray-bg2)}
+.stat-val{font-size:28px;font-weight:900;line-height:1;letter-spacing:-.5px}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:5px;font-weight:500}
+.stat-cell.s-blue .stat-val{color:var(--blue)}
+.stat-cell.s-green .stat-val{color:var(--green)}
+.stat-cell.s-red .stat-val{color:var(--red)}
+.stat-cell.s-amber .stat-val{color:var(--amber)}
+.sec-header{text-align:center;padding:11px 20px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:14px;font-size:15px;font-weight:600;box-shadow:var(--shadow)}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--blue-d) 0%,var(--blue) 60%,#1565C0 100%);padding:20px}
+.login-card{background:#fff;border-radius:14px;padding:42px 38px;width:380px;max-width:100%;box-shadow:0 24px 64px rgba(0,0,0,.32)}
+.login-logo{text-align:center;margin-bottom:8px}
+.login-logo-txt{font-size:22px;font-weight:900;color:var(--blue);letter-spacing:.5px}
+.login-logo-txt span{color:var(--pink)}
+.login-sub{text-align:center;font-size:13px;color:var(--text2);margin-bottom:26px}
+.g-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;color:var(--text);transition:.18s;font-family:inherit}
+.g-btn:hover{background:var(--gray-bg2);border-color:var(--blue)}
+
+/* PHONE FRAME (Store View preview) */
+.phone-frame{width:360px;max-width:100%;border:10px solid #1a1a1a;border-radius:40px;overflow:hidden;box-shadow:0 24px 72px rgba(0,0,0,.4);margin:0 auto;background:#000}
+.phone-notch{height:26px;background:#000;display:flex;align-items:center;justify-content:center}
+.phone-notch::after{content:"";width:80px;height:15px;background:#111;border-radius:0 0 12px 12px}
+.phone-screen{background:var(--bg);min-height:560px;max-height:620px;overflow-y:auto}
+
+/* MOBILE APP SHELL (real AM/Store interface) */
+.m-shell{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--bg);overflow:hidden;position:relative}
+.m-top{background:var(--blue-d);flex-shrink:0}
+.m-top-brand{padding:11px 16px;display:flex;align-items:center;justify-content:space-between}
+.m-brand-txt{color:#fff;font-size:15px;font-weight:900;letter-spacing:.3px}
+.m-brand-txt span{color:var(--pink-l)}
+.m-top-sub{background:var(--blue);padding:8px 16px}
+.m-top-title{color:#fff;font-size:13px;font-weight:700}
+.m-top-tag{color:rgba(255,255,255,.65);font-size:10px;margin-top:1px}
+.m-strip{background:var(--pink);padding:9px 16px;display:flex;gap:8px;align-items:center;color:#fff;font-size:12px;font-weight:700}
+.m-stats{background:rgba(0,0,0,.15);padding:10px 16px;display:flex}
+.m-stat{flex:1;text-align:center}
+.m-stat+.m-stat{border-left:1px solid rgba(255,255,255,.15)}
+.m-stat-num{font-size:19px;font-weight:900;color:#fff;line-height:1}
+.m-stat-lbl{font-size:9px;color:rgba(255,255,255,.6);margin-top:2px}
+.m-prog{padding:8px 16px;background:rgba(0,0,0,.1)}
+.m-prog-row{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.7);margin-bottom:4px}
+.m-prog-bar{height:4px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden}
+.m-prog-fill{height:100%;background:#fff;transition:width .4s}
+.m-body{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:9px;-webkit-overflow-scrolling:touch}
+.m-foot{flex-shrink:0;padding:10px 12px;background:#fff;border-top:1px solid var(--border);box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+
+/* Nearest store banner */
+.near-banner{background:linear-gradient(135deg,var(--green) 0%,var(--green-l) 100%);border-radius:10px;padding:12px 14px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 14px rgba(46,125,50,.3)}
+.near-banner-info{flex:1;min-width:0}
+.near-banner-lbl{font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.5px}
+.near-banner-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.near-banner-dist{font-size:11px;opacity:.9;margin-top:1px}
+
+/* Store cards (mobile) */
+.s-card{background:#fff;border-radius:10px;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.s-card:active{transform:scale(.99)}
+.s-card-accent{height:3px}
+.s-card-in{padding:11px 13px}
+.s-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.s-card-code{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.5px}
+.s-card-name{font-size:13px;font-weight:700;color:var(--text);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:185px}
+.s-card-loc{font-size:11px;color:var(--text3);margin-top:2px}
+.s-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+
+/* Question item (mobile + preview) */
+.q-card{background:#fff;border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.q-card-head{display:flex;gap:9px;padding:12px 13px 8px}
+.q-no{width:23px;height:23px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.q-no.done{background:var(--green-l)}.q-no.nc{background:var(--red-l)}.q-no.na{background:var(--gray)}
+.q-q{flex:1;min-width:0}
+.q-q-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.4}
+.q-q-sub{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5}
+.ans-row{display:flex;padding:0 13px 10px;gap:7px}
+.ans-btn{flex:1;padding:8px 4px;border:2px solid var(--border);border-radius:8px;cursor:pointer;background:#fff;font-size:12px;font-weight:500;text-align:center;transition:.18s;font-family:inherit}
+.ans-btn:hover{border-color:var(--gray-l)}
+.ans-btn.yes.sel{background:var(--green-bg);border-color:var(--green-l);color:var(--green);font-weight:700}
+.ans-btn.no.sel{background:var(--red-bg);border-color:var(--red-l);color:var(--red);font-weight:700}
+.ans-btn.na.sel{background:var(--gray-bg);border-color:var(--gray);color:var(--gray);font-weight:700}
+.rem-wrap{padding:0 13px 11px}
+.rem-lbl{font-size:10px;color:var(--text3);font-weight:500;margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.3px}
+.rem-ta{width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;resize:none;background:var(--gray-bg2);outline:none;height:50px}
+.rem-ta:focus{border-color:var(--blue);background:#fff}
+.fd-box{margin:0 13px 11px;background:var(--blue-ll);border-radius:8px;padding:11px;border:1px solid var(--blue-lll)}
+.fd-t{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px}
+.fd-g{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.fd-l{font-size:9px;font-weight:700;color:var(--text2);margin-bottom:3px;text-transform:uppercase}
+.fd-i{width:100%;padding:6px 8px;border:1px solid var(--blue-lll);border-radius:5px;font-size:12px;background:#fff;font-family:inherit;outline:none}
+.fd-ro{background:#fff;border:1px solid var(--blue-lll);border-radius:5px;padding:6px 8px;font-size:12px;font-weight:700;color:var(--blue);min-height:29px}
+.ph-box{margin:0 13px 11px}
+.ph-img{width:100%;border-radius:8px;border:1px solid var(--border);display:block;margin-bottom:6px}
+.ph-drop{border:2px dashed var(--border);border-radius:8px;padding:20px 12px;text-align:center;cursor:pointer;background:var(--gray-bg2)}
+.ph-drop:hover{border-color:var(--blue)}
+
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;align-items:center;justify-content:center;z-index:900;padding:14px}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow2);display:flex;flex-direction:column}
+.modal-lg{max-width:600px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-size:15px;font-weight:700}
+.modal-x{background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:2px 6px;border-radius:4px}
+.modal-x:hover{color:var(--text);background:var(--gray-bg2)}
+.modal-body{padding:20px;flex:1;overflow-y:auto}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+
+/* Camera */
+.cam-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:12px}
+.cam-wrap video{width:100%;display:block;max-height:260px;object-fit:cover}
+.cam-ts{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.62);color:#fff;font-size:10px;padding:5px 10px}
+
+/* Empty */
+.empty{text-align:center;padding:46px 20px;color:var(--text3)}
+.empty-i{font-size:40px;margin-bottom:12px}
+.empty-t{font-size:14px;font-weight:500;color:var(--text2)}
+.empty-s{font-size:12px;margin-top:4px}
+
+/* Rows */
+.lrow{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border2)}
+.lrow:last-child{border-bottom:none}
+.lrow:hover{background:var(--gray-bg2)}
+.lrow.click{cursor:pointer}
+.lav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.linfo{flex:1;min-width:0}
+.lname{font-size:13px;font-weight:700;color:var(--text)}
+.lsub{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lcode{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-ll);padding:3px 8px;border-radius:4px;font-family:monospace;white-space:nowrap}
+.lactions{display:flex;gap:5px;flex-shrink:0}
+
+/* Toast & Loader */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;z-index:9999;display:none;white-space:nowrap;box-shadow:var(--shadow2);pointer-events:none;max-width:90vw;text-align:center}
+#loader{position:fixed;inset:0;background:rgba(255,255,255,.88);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:8000}
+#ld-spin{width:42px;height:42px;border-radius:50%;border:4px solid var(--blue-ll);border-top:4px solid var(--blue);animation:spin 1s linear infinite}
+#ld-msg{margin-top:12px;font-size:13px;color:var(--text2)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Responsive */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}.hamburger{display:block}
+  .page-body{padding:14px}.grid-2,.grid-3{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .stats-bar{flex-wrap:wrap}.stat-cell{flex:1 1 50%;border-bottom:1px solid var(--border)}
+  .m-grid{grid-template-columns:1fr}
+}
+@media(min-width:481px){.m-shell{box-shadow:var(--shadow2)}}
+
+/* Test mode banner */
+.test-banner{background:var(--amber);color:#fff;text-align:center;padding:5px;font-size:11px;font-weight:700;letter-spacing:.5px}
+
+/* Logo + role picker */
+.vmm-logo{display:block;margin:0 auto;height:48px;width:auto}
+.sb-logo .vmm-logo{height:34px;filter:brightness(0) invert(1)}
+.role-pick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:18px 0 16px}
+.role-btn{background:#fff;border:2px solid var(--border);border-radius:10px;padding:13px 6px;cursor:pointer;text-align:center;transition:.18s;font-family:inherit}
+.role-btn:hover{border-color:var(--blue-l)}
+.role-btn.active{border-color:var(--pink);background:#FCE4EC}
+.role-ic{font-size:22px;line-height:1}
+.role-tx{font-size:11px;font-weight:700;color:var(--text2);margin-top:5px}
+.role-btn.active .role-tx{color:var(--pink-d)}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="scrLogin" class="login-wrap" style="display:none">
+  <div class="login-card">
+    <div class="login-logo"><img class="vmm-logo" style="height:54px" alt="VMM"></div>
+    <div class="login-sub">Daily Discipline Review · Central Operations</div>
+    <div class="role-pick">
+      <button class="role-btn active" data-role="AM" onclick="pickRole('AM')"><div class="role-ic">🧭</div><div class="role-tx">Area Manager</div></button>
+      <button class="role-btn" data-role="STORE" onclick="pickRole('STORE')"><div class="role-ic">🏪</div><div class="role-tx">Store</div></button>
+      <button class="role-btn" data-role="ADMIN" onclick="pickRole('ADMIN')"><div class="role-ic">🛡️</div><div class="role-tx">Admin</div></button>
+    </div>
+    <div class="form-group" style="margin-top:6px">
+      <label class="form-label" id="loginCodeLbl">Enter your E-Code</label>
+      <input class="form-control" id="loginCode" placeholder="e.g. 6054605" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" style="font-size:16px;padding:12px 14px;text-align:center;letter-spacing:1px">
+      <div class="form-group" id="loginPassWrap" style="display:none;margin-top:10px">
+        <label class="form-label">Admin Password</label>
+        <input class="form-control" id="loginPass" type="password" placeholder="••••••" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" style="font-size:16px;padding:12px 14px;text-align:center;letter-spacing:3px">
+      </div>
+      <div id="loginErr" class="small" style="color:var(--red);margin-top:6px;display:none"></div>
+    </div>
+    <button class="btn btn-pink btn-lg btn-full" onclick="doLogin()">Continue →</button>
+    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:18px">v6.2 · Designed & Developed by Shubhendu Sinha · VMM Central Ops & BI</div>
+  </div>
+</div>
+
+<!-- ═══ MOBILE SHELL (AM / STORE) ═══ -->
+<div id="scrMobile" class="m-shell" style="display:none">
+  <div id="mTestBanner" class="test-banner hidden">🧪 TEST MODE ACTIVE</div>
+  <div class="m-top">
+    <div class="m-top-brand">
+      <div class="m-brand-txt">VISHAL <span>MEGA MART</span></div>
+      <button onclick="doLogout()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:6px;cursor:pointer;color:#fff;display:flex">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="m-top-sub"><div class="m-top-title" id="mTitle">Daily Discipline Review</div><div class="m-top-tag" id="mTag">Previous-day review</div></div>
+    <div class="m-stats">
+      <div class="m-stat"><div class="m-stat-num" id="mTotal">—</div><div class="m-stat-lbl">ASSIGNED</div></div>
+      <div class="m-stat"><div class="m-stat-num" id="mDone">—</div><div class="m-stat-lbl">DONE</div></div>
+      <div class="m-stat"><div class="m-stat-num" id="mSkip">—</div><div class="m-stat-lbl">SKIPPED</div></div>
+      <div class="m-stat"><div class="m-stat-num" id="mComp" style="color:#81D4FA">—%</div><div class="m-stat-lbl">COMPLIANCE</div></div>
+    </div>
+    <div class="m-prog">
+      <div class="m-prog-row"><span>Progress</span><span id="mProgTxt">0 / 0</span></div>
+      <div class="m-prog-bar"><div class="m-prog-fill" id="mProgFill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div style="padding:9px 12px 2px;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.5px" id="mListLbl">YOUR STORES</span>
+    <span style="font-size:11px;color:var(--text3)" id="mGps">📍 Locating…</span>
+  </div>
+  <div class="m-body" id="mStoreList" style="padding-top:2px"></div>
+</div>
+
+<!-- ═══ REVIEW FORM ═══ -->
+<div id="scrReview" class="m-shell" style="display:none">
+  <div id="rvTestBanner" class="test-banner hidden">🧪 TEST MODE ACTIVE</div>
+  <div class="m-top">
+    <div class="m-top-brand">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="backToDash()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:6px;cursor:pointer;color:#fff;display:flex">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="m-brand-txt" id="rvTitle">Review</div>
+      </div>
+      <div style="text-align:right;color:rgba(255,255,255,.7);font-size:10px" id="rvDate"></div>
+    </div>
+    <div class="m-strip"><span>📍</span><span id="rvStrip">Store</span></div>
+    <div class="m-prog">
+      <div class="m-prog-row"><span>Questions Answered</span><span id="rvProgTxt">0 / 0</span></div>
+      <div class="m-prog-bar"><div class="m-prog-fill" id="rvProgFill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="m-body" id="rvList"></div>
+  <div class="m-foot">
+    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:8px">
+      <button class="btn btn-outline" onclick="openSkip()">⏭ Skip</button>
+      <button class="btn btn-pink" id="rvSubmit" onclick="doSubmit()">✓ Submit Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS ═══ -->
+<div id="scrSuccess" class="login-wrap" style="display:none">
+  <div class="login-card" style="text-align:center">
+    <div style="font-size:52px;margin-bottom:14px">✅</div>
+    <div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:6px">Review Submitted!</div>
+    <div style="font-size:13px;color:var(--text2)">Ref: <strong id="scRef"></strong></div>
+    <div style="font-size:13px;color:var(--text2);margin-top:4px" id="scComp"></div>
+    <div style="font-size:12px;color:var(--text3);margin-top:6px;margin-bottom:22px" id="scNC"></div>
+    <button class="btn btn-blue btn-full" onclick="backToDash()">← Back to Dashboard</button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="scrAdmin" class="admin-wrap" style="display:none">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sb-logo"><img class="vmm-logo" alt="VMM"></div>
+    <div class="sb-user"><div class="sb-user-name" id="sbName">Admin</div><div class="sb-user-role" id="sbRole">Central Ops & BI · Admin</div></div>
+    <nav class="sb-nav">
+      <div class="sb-section">Main</div>
+      <div class="nav-item active" data-pg="dashboard" onclick="navTo('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item" data-pg="submissions" onclick="navTo('submissions')"><span class="nav-icon">📋</span> Submissions</div>
+      <div class="sb-section">Management</div>
+      <div class="nav-item" data-pg="stores" onclick="navTo('stores')"><span class="nav-icon">🏪</span> Stores</div>
+      <div class="nav-item" data-pg="questions" onclick="navTo('questions')"><span class="nav-icon">❓</span> Questions</div>
+      <div class="sb-section">Tools</div>
+      <div class="nav-item" data-pg="storeview" onclick="navTo('storeview')"><span class="nav-icon">👁</span> User View</div>
+      <div class="nav-item" data-pg="emailpush" onclick="navTo('emailpush')"><span class="nav-icon">📧</span> Email Push</div>
+      <div class="nav-item" data-pg="settings" onclick="navTo('settings')"><span class="nav-icon">⚙️</span> Settings</div>
+    </nav>
+    <div class="sb-footer">Designed & Developed by<br>Shubhendu Sinha<br>VMM Central Operations & BI</div>
+  </div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="topTitle">Dashboard</div>
+      <div class="topbar-date" id="topDate"></div>
+      <button class="btn btn-outline btn-sm" onclick="navTo('storeview')">👁 User View</button>
+    </div>
+    <div class="page-body">
+
+      <!-- DASHBOARD -->
+      <div id="pageDashboard" class="a-page active">
+        <div class="filter-row">
+          <span class="filter-lbl">From Date</span>
+          <input type="date" class="filter-input" id="dFrom">
+          <span class="filter-lbl">Upto Date</span>
+          <input type="date" class="filter-input" id="dTo">
+          <button class="btn btn-purple" onclick="loadDash()">FILTER</button>
+          <button class="btn btn-red" onclick="clearDash()">CLEAR</button>
+          <button class="btn btn-green" onclick="exportDashCSV()">EXCEL</button>
+          <select class="filter-input" id="dType" onchange="loadDash()" style="margin-left:auto"><option value="AM">AM Review</option><option value="STORE">Store Checklist</option></select>
+        </div>
+        <div class="sec-header" id="dScope">All Stores</div>
+        <div class="stats-bar">
+          <div class="stat-cell s-blue"><div class="stat-val" id="dTotal">0</div><div class="stat-lbl">Total Stores</div></div>
+          <div class="stat-cell" style="--c:#7B1FA2"><div class="stat-val" id="dAMs" style="color:#7B1FA2">0</div><div class="stat-lbl">Total AMs</div></div>
+          <div class="stat-cell s-green clickable" onclick="filterDashStatus('submitted')"><div class="stat-val" id="dSub">0</div><div class="stat-lbl">Submitted</div></div>
+          <div class="stat-cell s-red clickable" onclick="filterDashStatus('pending')"><div class="stat-val" id="dPend">0</div><div class="stat-lbl">Pending</div></div>
+          <div class="stat-cell s-amber"><div class="stat-val" id="dFill">0%</div><div class="stat-lbl">Fill %</div></div>
+          <div class="stat-cell"><div class="stat-val" id="dPct" style="color:var(--blue)">0%</div><div class="stat-lbl">Compliance %</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><div class="card-head"><span class="card-title">AM-wise Compliance</span></div><div class="card-body" style="padding:12px"><canvas id="chartAM" height="200"></canvas></div></div>
+          <div class="card"><div class="card-head"><span class="card-title">Top "Not Done" Sections</span></div><div class="card-body" style="padding:12px"><canvas id="chartNC" height="200"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title" id="dSummaryTitle">Question-wise Summary</span><span class="small text2" id="dPeriod"></span></div>
+          <div class="tbl-wrap" id="dSummaryTbl"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">ZFM / AM Coverage</span><span class="small text2" id="covNote"></span></div>
+          <div class="tbl-wrap" id="dCoverageTbl"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Store-wise Status</span><span class="badge badge-blue" id="dStoreCount"></span></div>
+          <div class="tbl-wrap" id="dStoreTbl"></div>
+        </div>
+      </div>
+
+      <!-- SUBMISSIONS -->
+      <div id="pageSubmissions" class="a-page">
+        <div class="filter-row">
+          <span class="filter-lbl">Date</span>
+          <input type="date" class="filter-input" id="subDate" onchange="loadSubs()">
+          <select class="filter-input" id="subType" onchange="loadSubs()"><option value="AM">AM Review</option><option value="STORE">Store Checklist</option></select>
+          <button class="btn btn-green" onclick="exportSubCSV()">EXCEL</button>
+        </div>
+        <div class="card"><div id="subList"></div></div>
+      </div>
+
+      <!-- STORES -->
+      <div id="pageStores" class="a-page">
+        <div class="info-box">🏪 Column mapping matches WeeklySafety StoreMapping.xlsx — A=StoreCode, C=SMMail, D=AMMail, E=ZFMEmail, F=SMName, H=AMName.</div>
+        <div class="filter-row">
+          <input type="text" class="filter-input" id="storeSearch" placeholder="Search code/name/AM…" oninput="renderStores()" style="flex:1;min-width:200px">
+          <button class="btn btn-outline btn-sm" onclick="dlSampleCSV()">⬇ Sample CSV</button>
+          <button class="btn btn-purple btn-sm" onclick="openAssignTool()">🔗 AM Coverage</button>
+          <button class="btn btn-blue btn-sm" onclick="openStoreModal(null)">+ Add</button>
+          <button class="btn btn-pink btn-sm" onclick="document.getElementById('storeFile').click()">⬆ Import</button>
+          <input type="file" id="storeFile" class="hidden" accept=".csv,.xlsx,.xls" onchange="importStores(this)">
+        </div>
+        <div id="importPrev" class="card hidden">
+          <div class="card-head"><span class="card-title">Import Preview</span><span class="badge badge-blue" id="importInfo"></span></div>
+          <div class="card-body">
+            <div class="tbl-wrap" id="importTbl" style="max-height:240px;overflow-y:auto;margin-bottom:12px"></div>
+            <button class="btn btn-pink" onclick="commitStores()">✓ Commit Import</button>
+            <button class="btn btn-outline" onclick="document.getElementById('importPrev').classList.add('hidden')">Cancel</button>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><span class="card-title">Stores</span><span class="badge badge-blue" id="storeCount"></span></div><div id="storeList"></div></div>
+      </div>
+
+      <!-- QUESTIONS -->
+      <div id="pageQuestions" class="a-page">
+        <div class="tab-bar">
+          <button class="tab-btn active" id="qTabAM" onclick="switchQType('AM')">AM Review Questions</button>
+          <button class="tab-btn" id="qTabSTORE" onclick="switchQType('STORE')">Store Checklist Questions</button>
+        </div>
+        <div class="filter-row">
+          <span class="filter-lbl" id="qTypeLbl">Showing: AM Review</span>
+          <button class="btn btn-outline btn-sm" onclick="dlQSampleCSV()" style="margin-left:auto">⬇ Sample CSV</button>
+          <button class="btn btn-purple btn-sm" onclick="document.getElementById('qFile').click()">⬆ Bulk Upload</button>
+          <input type="file" id="qFile" class="hidden" accept=".csv,.xlsx,.xls" onchange="importQuestions(this)">
+          <button class="btn btn-pink btn-sm" onclick="openQModal(null)">+ Add Question</button>
+        </div>
+        <div id="qImportPrev" class="card hidden">
+          <div class="card-head"><span class="card-title">Question Import Preview</span><span class="badge badge-blue" id="qImportInfo"></span></div>
+          <div class="card-body">
+            <div class="tbl-wrap" id="qImportTbl" style="max-height:220px;overflow-y:auto;margin-bottom:12px"></div>
+            <button class="btn btn-pink" onclick="commitQuestions()">✓ Commit Import</button>
+            <button class="btn btn-outline" onclick="document.getElementById('qImportPrev').classList.add('hidden')">Cancel</button>
+          </div>
+        </div>
+        <div class="card"><div id="qList"></div></div>
+      </div>
+
+      <!-- USER VIEW (preview) -->
+      <div id="pageStoreview" class="a-page">
+        <div class="info-box">👁 Live preview of the mobile interface that AM / Store users see on their phone.</div>
+        <div class="filter-row">
+          <span class="filter-lbl">Preview as</span>
+          <select class="filter-input" id="pvRole" onchange="renderPreview()"><option value="AM">AM (Daily Review)</option><option value="STORE">Store (Checklist)</option></select>
+          <select class="filter-input" id="pvStore" onchange="renderPreview()" style="min-width:220px"></select>
+        </div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen" id="pvScreen"></div>
+          </div>
+          <div class="card" style="flex:1;min-width:280px;max-width:380px">
+            <div class="card-head"><span class="card-title">Selected Store Info</span></div>
+            <div class="card-body" id="pvInfo"><div class="text3 small">Select a store to view details</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL PUSH -->
+      <div id="pageEmailpush" class="a-page">
+        <div class="info-box">📧 Build the previous-day report, then "Send via Outlook" downloads a ready <strong>.eml</strong> — double-click it and Outlook opens a draft with To, Cc, subject, the full <strong>HTML dashboard in the body</strong>, and the <strong>interactive dashboard attached</strong>. Just hit Send. "Test" makes the same draft addressed to you.</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Compose Dashboard Email</span></div>
+            <div class="card-body">
+              <div class="form-group"><label class="form-label">Report Date</label><input type="date" class="form-control" id="epDate"></div>
+              <div class="form-group"><label class="form-label">Review Type</label><select class="form-control" id="epType"><option value="AM">AM Review</option><option value="STORE">Store Checklist</option></select></div>
+              <div class="form-group"><label class="form-label">To (comma-separated)</label><textarea class="form-control" id="epTo" rows="2" placeholder="zfm1@vishalretail.co.in, coo@vishalretail.co.in"></textarea></div>
+              <div class="form-group"><label class="form-label">Cc (comma-separated)</label><textarea class="form-control" id="epCc" rows="2" placeholder="self@vishalretail.co.in"></textarea></div>
+              <div class="form-group"><label class="form-label">Subject</label><input class="form-control" id="epSubject" value="Daily Discipline Review Dashboard"></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+                <button class="btn btn-blue" onclick="buildEmailPreview()">🔄 Build Report</button>
+                <button class="btn btn-amber" onclick="sendViaOutlook()">📤 Send via Outlook</button>
+                <button class="btn btn-green" onclick="sendTestEmail()">🧪 Test to Me</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><span class="card-title">Email Preview</span></div>
+            <div class="card-body" id="epPreview" style="max-height:480px;overflow-y:auto"><div class="text3 small">Click "Build Report" to generate preview</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="pageSettings" class="a-page">
+        <div class="card">
+          <div class="card-head"><span class="card-title">📧 Email Method</span><span class="badge badge-green">No setup needed</span></div>
+          <div class="card-body">
+            <div class="success-box" style="margin:0">All emails (ZFM non-compliance alerts and the admin dashboard push) open directly in your <strong>default mail client / Outlook</strong> with everything pre-filled — just review and hit Send. No keys, no third-party service, nothing to configure. Mails are sent from <strong>shubhendu.sinha@vishalretail.co.in</strong>.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">🧪 Test Mode</span><span class="badge badge-amber">Testing only</span></div>
+          <div class="card-body">
+            <div class="warn-box">When enabled, store geofence is bypassed (any store can be opened) and ZFM alert emails are addressed to your test ID instead of real ZFMs.</div>
+            <div class="flex center between" style="max-width:420px">
+              <div><div style="font-weight:700;font-size:13px">Enable Test Mode</div><div class="small text2">Bypass GPS + redirect alerts</div></div>
+              <label class="tgl"><input type="checkbox" id="cfgTestMode" onchange="saveTestMode()"><span class="tgl-sl"></span></label>
+            </div>
+            <div class="form-group" style="max-width:420px;margin-top:14px"><label class="form-label">Test Email (ZFM alerts go here in test mode)</label><input class="form-control" id="cfgTestMail" placeholder="shubhendu.sinha@vishalretail.co.in"></div>
+            <button class="btn btn-blue btn-sm" onclick="saveTestMode()">Save Test Settings</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">📍 GPS Geofence</span></div>
+          <div class="card-body">
+            <div class="form-group" style="max-width:300px"><label class="form-label">Detection Radius (metres)</label><input type="number" class="form-control" id="cfgRadius" value="100" min="50" max="5000"></div>
+            <button class="btn btn-blue btn-sm" onclick="saveRadius()">Save Radius</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OVERLAYS ═══ -->
+<div class="overlay" id="ovRange"><div class="modal"><div class="modal-head"><span class="modal-title">📍 Out of Range</span><button class="modal-x" onclick="closeOv('ovRange')">×</button></div><div class="modal-body"><p style="color:var(--text2);line-height:1.6;margin-bottom:10px">You must be within the geofence radius to submit. Enable Test Mode in admin settings to bypass.</p><div class="warn-box" id="rangeDetail" style="margin:0"></div></div><div class="modal-foot"><button class="btn btn-blue" onclick="closeOv('ovRange')">OK</button></div></div></div>
+
+<div class="overlay" id="ovSkip"><div class="modal"><div class="modal-head"><span class="modal-title">⏭ Skip Store</span><button class="modal-x" onclick="closeOv('ovSkip')">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Reason for skipping *</label><textarea class="form-control" id="skipReason" rows="4" placeholder="Minimum 10 characters…"></textarea><div id="skipErr" class="small" style="color:var(--red);margin-top:4px;display:none">Please enter at least 10 characters.</div></div></div><div class="modal-foot"><button class="btn btn-outline" onclick="closeOv('ovSkip')">Cancel</button><button class="btn btn-pink" onclick="confirmSkip()">Confirm Skip</button></div></div></div>
+
+<div class="overlay" id="ovCam"><div class="modal"><div class="modal-head"><span class="modal-title" id="camTitle">Take Photo</span><button class="modal-x" onclick="closeCam()">×</button></div><div class="modal-body"><div class="cam-wrap"><video id="camVid" autoplay playsinline muted></video><div class="cam-ts" id="camTs"></div></div><button class="btn btn-pink btn-full" onclick="capturePhoto()">📸 Capture Photo</button></div><div class="modal-foot"><button class="btn btn-outline" onclick="closeCam()">Cancel</button></div></div></div>
+
+<div class="overlay" id="ovStore"><div class="modal modal-lg"><div class="modal-head"><span class="modal-title" id="storeModalTitle">Store</span><button class="modal-x" onclick="closeOv('ovStore')">×</button></div><div class="modal-body"><div class="m-grid">
+  <div class="form-group"><label class="form-label">Store Code</label><input class="form-control" id="mCode" placeholder="HH02"></div>
+  <div class="form-group"><label class="form-label">Store Name</label><input class="form-control" id="mName"></div>
+  <div class="form-group"><label class="form-label">SM Name</label><input class="form-control" id="mSMName"></div>
+  <div class="form-group"><label class="form-label">SM Email</label><input class="form-control" id="mSMMail"></div>
+  <div class="form-group"><label class="form-label">AM Name</label><input class="form-control" id="mAMName"></div>
+  <div class="form-group"><label class="form-label">AM Email</label><input class="form-control" id="mAMMail"></div>
+  <div class="form-group"><label class="form-label">AM Code</label><input class="form-control" id="mAMCode" placeholder="6054605"></div>
+  <div class="form-group"><label class="form-label">ZFM Code</label><input class="form-control" id="mZFMCode"></div>
+  <div class="form-group"><label class="form-label">ZFM Email</label><input class="form-control" id="mZFMEmail"></div>
+  <div class="form-group"><label class="form-label">City</label><input class="form-control" id="mCity"></div>
+  <div class="form-group"><label class="form-label">State</label><input class="form-control" id="mState"></div>
+  <div class="form-group"><label class="form-label">Latitude</label><input class="form-control" id="mLat" type="number" step="any"></div>
+  <div class="form-group"><label class="form-label">Longitude</label><input class="form-control" id="mLng" type="number" step="any"></div>
+  <div class="form-group flex center gap" style="padding-top:22px"><input type="checkbox" id="mActive" checked><label style="font-size:13px">Active</label></div>
+</div></div><div class="modal-foot"><button class="btn btn-outline" onclick="closeOv('ovStore')">Cancel</button><button class="btn btn-pink" onclick="saveStore()">Save Store</button></div></div></div>
+
+<div class="overlay" id="ovQ"><div class="modal"><div class="modal-head"><span class="modal-title" id="qModalTitle">Question</span><button class="modal-x" onclick="closeOv('ovQ')">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Question Type</label><select class="form-control" id="mQType"><option value="AM">AM Review</option><option value="STORE">Store Checklist</option></select></div>
+  <div class="form-group"><label class="form-label">Sort Order</label><input class="form-control" id="mQOrd" type="number" min="1" value="1"></div>
+  <div class="form-group"><label class="form-label">Section Title</label><input class="form-control" id="mQTtl" placeholder="e.g. Cash Deposit / S&E"></div>
+  <div class="form-group"><label class="form-label">Sub Points (comma-separated)</label><textarea class="form-control" id="mQSub" rows="3"></textarea></div>
+  <div class="flex gap" style="gap:20px"><label class="flex center gap" style="font-size:13px"><input type="checkbox" id="mQFD"> Further Details</label><label class="flex center gap" style="font-size:13px"><input type="checkbox" id="mQPhoto"> Requires Photo</label></div>
+</div><div class="modal-foot"><button class="btn btn-outline" onclick="closeOv('ovQ')">Cancel</button><button class="btn btn-pink" onclick="saveQ()">Save</button></div></div></div>
+
+<div class="overlay" id="ovSub"><div class="modal modal-lg"><div class="modal-head"><span class="modal-title" id="subDetTitle">Submission</span><button class="modal-x" onclick="closeOv('ovSub')">×</button></div><div class="modal-body" id="subDetBody"></div><div class="modal-foot"><button class="btn btn-blue" onclick="closeOv('ovSub')">Close</button></div></div></div>
+
+<div class="overlay" id="ovAssign"><div class="modal modal-lg"><div class="modal-head"><span class="modal-title">🔗 AM Coverage (auto-paired by E-Code)</span><button class="modal-x" onclick="closeOv('ovAssign')">×</button></div><div class="modal-body" id="assignBody"></div><div class="modal-foot"><button class="btn btn-outline" onclick="closeOv('ovAssign')">Close</button></div></div></div>
+
+<!-- Toast & Loader -->
+<div id="toast"></div>
+<div id="loader"><div id="ld-spin"></div><div id="ld-msg">Loading…</div></div>
+
+<!-- CDN -->
+<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-auth.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-firestore.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+'use strict';
+// ════════════════════ FIREBASE ════════════════════
+firebase.initializeApp({
+  apiKey:"AIzaSyCh5OV-AzoHoqyVeyB9Fk84ilwvBeMHsoA",
+  authDomain:"vmm-amreview.firebaseapp.com",
+  projectId:"vmm-amreview",
+  storageBucket:"vmm-amreview.firebasestorage.app",
+  messagingSenderId:"170389330525",
+  appId:"1:170389330525:web:940a9493106f8ddce30bb4"
+});
+var auth=firebase.auth(), db=firebase.firestore();
+// Corporate networks / proxies block Firestore's default streaming (WebChannel) transport,
+// which surfaces as "WebChannel transport errored" + "Could not reach Cloud Firestore backend".
+// Forcing long-polling makes Firestore use plain HTTPS requests that proxies allow.
+try{ db.settings({experimentalForceLongPolling:true, useFetchStreams:false}); }catch(e){ console.warn('fs settings',e); }
+var LOGO="data:image/png;base64,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";
+
+// ════ IDENTITY: code-based login ════
+// Admin E-Codes (Shubhendu, Aishveriya). Anyone else = AM/Store by their code.
+var ADMIN_CODES=['6020922','6027250'];
+var ADMIN_PASS='811992';
+var ADMIN_NAMES={'6020922':'Shubhendu Sinha','6027250':'Aishveriya Arora'};
+var DEFAULT_FROM='shubhendu.sinha@vishalretail.co.in';
+
+// ════ STATE ════
+var gUser=null,gProfile=null;
+var gStores=[],gQuestions=[],gAllQuestions=[],gGPS=null;
+var gReview={store:null,answers:[],mainPhoto:null,type:'AM'};
+var gImportRows=[],gQImportRows=[];
+var gCamTarget=null,gCamStream=null,gCamTick=null;
+var gChartAM=null,gChartNC=null;
+var gStoreEdit=null,gQEdit=null,gUserEdit=null;
+var gCurrentQType='AM';
+var gConfig={testMode:false,testMail:'',gpsRadius:100};
+var gLoginRole='AM';
+var gDashCache=[];
+
+// ════ DEFAULT QUESTIONS (AM) ════
+var DEF_Q=[
+  {sortOrder:1,reviewType:'AM',sectionTitle:'Opening & Closing Compliance',subPoints:'Store timing verified, entry register signed',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:2,reviewType:'AM',sectionTitle:'Cash Deposit / S&E',subPoints:'Cash counted, deposit slip collected',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:3,reviewType:'AM',sectionTitle:'GRC – DC / DSD',subPoints:'DC GRC verified, DSD GRC checked',requiresFurtherDetails:true,requiresPhoto:false,isActive:true},
+  {sortOrder:4,reviewType:'AM',sectionTitle:'Safety Checklist (App-Based)',subPoints:'All safety points verified on app',requiresFurtherDetails:false,requiresPhoto:true,isActive:true},
+  {sortOrder:5,reviewType:'AM',sectionTitle:'Bulk & 0004 Accuracy',subPoints:'Bulk price-tagged, 0004 codes matched',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:6,reviewType:'AM',sectionTitle:'Global Count – Top 5 MC',subPoints:'Top 5 MC physically counted',requiresFurtherDetails:true,requiresPhoto:false,isActive:true},
+  {sortOrder:7,reviewType:'AM',sectionTitle:'2–4 PM SOP Execution',subPoints:'SOP completed in 2-4 PM window',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:8,reviewType:'AM',sectionTitle:'Walk Notes – SM (Other than DILO)',subPoints:'SM walk notes reviewed',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:9,reviewType:'AM',sectionTitle:'Damages / Expiry Check',subPoints:'Damaged tagged, expired removed',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:10,reviewType:'AM',sectionTitle:'NOH & Zero Sales – Top 3 MC',subPoints:'NOH resolved, Zero Sales actioned',requiresFurtherDetails:true,requiresPhoto:false,isActive:true}
+];
+var DEF_Q_STORE=[
+  {sortOrder:1,reviewType:'STORE',sectionTitle:'Store Opened On Time',subPoints:'Shutter up, lights on by opening time',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:2,reviewType:'STORE',sectionTitle:'Cleanliness & Housekeeping',subPoints:'Floor, washroom, entrance clean',requiresFurtherDetails:false,requiresPhoto:true,isActive:true},
+  {sortOrder:3,reviewType:'STORE',sectionTitle:'Price Tags & Signage',subPoints:'All tags current, offer signage placed',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:4,reviewType:'STORE',sectionTitle:'Staff Grooming & Uniform',subPoints:'All staff in uniform, ID worn',requiresFurtherDetails:false,requiresPhoto:false,isActive:true},
+  {sortOrder:5,reviewType:'STORE',sectionTitle:'Stock Availability',subPoints:'Shelves filled, gaps replenished',requiresFurtherDetails:false,requiresPhoto:false,isActive:true}
+];
+
+// ════════════════════ AUTH (anonymous + code login) ════════════════════
+// Anonymous auth gives Firestore an auth context; identity comes from the code the user enters.
+window.addEventListener('DOMContentLoaded',function(){
+  // paint logos
+  var logo=document.querySelectorAll('.vmm-logo'); for(var i=0;i<logo.length;i++) logo[i].src=LOGO;
+});
+var gAuthTries=0, gBooted=false;
+function tryAnonAuth(){
+  auth.signInAnonymously().catch(function(e){
+    gAuthTries++;
+    if(gAuthTries<4){ setTimeout(tryAnonAuth,1500*gAuthTries); }   // quiet retry on flaky/proxy networks
+    else { console.warn('anon auth unavailable, continuing'); boot(); } // proceed anyway (Firestore rules permitting)
+  });
+}
+tryAnonAuth();
+auth.onAuthStateChanged(function(user){ gUser=user||{uid:'anon'}; if(user) boot(); });
+function boot(){
+  if(gBooted) return; gBooted=true;
+  loadConfig().then(function(){
+    var sess=sessionStorage_get();
+    if(sess&&sess.role){ resumeSession(sess); }
+    else showScreen('scrLogin');
+  });
+}
+
+// lightweight in-memory session (sessionStorage NOT used in artifacts; on GitHub Pages it works fine)
+function sessionStorage_get(){ try{ return JSON.parse(sessionStorage.getItem('vmm_sess')||'null'); }catch(e){ return null; } }
+function sessionStorage_set(o){ try{ sessionStorage.setItem('vmm_sess',JSON.stringify(o)); }catch(e){} }
+function sessionStorage_clear(){ try{ sessionStorage.removeItem('vmm_sess'); }catch(e){} }
+
+function pickRole(r){
+  gLoginRole=r;
+  var btns=document.querySelectorAll('.role-btn'); for(var i=0;i<btns.length;i++) btns[i].classList.toggle('active',btns[i].getAttribute('data-role')===r);
+  var lbl=document.getElementById('loginCodeLbl'),inp=document.getElementById('loginCode'),pw=document.getElementById('loginPassWrap');
+  if(r==='STORE'){ lbl.textContent='Enter your Store Code'; inp.placeholder='e.g. HA04'; pw.style.display='none'; }
+  else if(r==='ADMIN'){ lbl.textContent='Enter your Admin E-Code'; inp.placeholder='Your E-Code'; pw.style.display=''; }
+  else { lbl.textContent='Enter your E-Code'; inp.placeholder='e.g. 6054605'; pw.style.display='none'; }
+  document.getElementById('loginErr').style.display='none'; inp.focus();
+}
+
+function doLogin(){
+  var code=(document.getElementById('loginCode').value||'').trim().toUpperCase();
+  var err=document.getElementById('loginErr');
+  if(!code){ err.textContent='Please enter your code.'; err.style.display=''; return; }
+  if(gLoginRole==='ADMIN'){
+    var pass=(document.getElementById('loginPass').value||'').trim();
+    if(ADMIN_CODES.indexOf(code)<0){ err.textContent='Invalid Admin E-Code.'; err.style.display=''; return; }
+    if(pass!==ADMIN_PASS){ err.textContent='Incorrect admin password.'; err.style.display=''; return; }
+    gProfile={role:'ADMIN',code:code,name:ADMIN_NAMES[code]||'Admin'};
+    sessionStorage_set(gProfile); initAdmin(); return;
+  }
+  if(gLoginRole==='STORE'){
+    if(!/^[A-Za-z]{2}\d{2}$/.test(code)){ err.textContent='Store code looks like HA04 (2 letters + 2 digits).'; err.style.display=''; return; }
+    gProfile={role:'STORE',code:code,storeCode:code,name:'Store '+code};
+    sessionStorage_set(gProfile); startMobile('STORE'); return;
+  }
+  // AM
+  if(!/^\d{5,8}$/.test(code)){ err.textContent='E-Code should be 5–8 digits.'; err.style.display=''; return; }
+  gProfile={role:'AM',code:code,amCode:code,name:'AM '+code};
+  sessionStorage_set(gProfile); startMobile('AM');
+}
+
+function resumeSession(sess){
+  gProfile=sess;
+  if(sess.role==='ADMIN') initAdmin();
+  else if(sess.role==='AM') startMobile('AM');
+  else if(sess.role==='STORE') startMobile('STORE');
+  else showScreen('scrLogin');
+}
+
+function doLogout(){ sessionStorage_clear(); gProfile=null; var c=document.getElementById('loginCode'); if(c)c.value=''; var p=document.getElementById('loginPass'); if(p)p.value=''; showScreen('scrLogin'); }
+
+function loadConfig(){
+  return db.collection('config').doc('app').get().then(function(s){
+    if(s.exists){ var d=s.data(); gConfig.testMode=!!d.testMode; gConfig.testMail=d.testMail||''; gConfig.gpsRadius=d.gpsRadius||100; }
+  }).catch(function(){});
+}
+
+// ════════════════════ SCREEN ROUTER ════════════════════
+var SCREENS=['scrLogin','scrMobile','scrReview','scrSuccess','scrAdmin'];
+function showScreen(id){
+  SCREENS.forEach(function(s){ var el=document.getElementById(s); if(el) el.style.display='none'; });
+  var t=document.getElementById(id);
+  t.style.display=(id==='scrAdmin'||id==='scrMobile'||id==='scrReview')?'flex':'';
+}
+
+// ════════════════════ ADMIN INIT ════════════════════
+function initAdmin(){
+  document.getElementById('sbName').textContent=gProfile.name||'Admin';
+  document.getElementById('sbRole').textContent='Central Ops & BI · Admin ('+gProfile.code+')';
+  var yday=toDateStr(addDays(new Date(),-1));
+  ['dFrom','dTo','subDate','epDate'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=yday; });
+  document.getElementById('topDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('cfgTestMode').checked=gConfig.testMode;
+  document.getElementById('cfgTestMail').value=gConfig.testMail||DEFAULT_FROM;
+  document.getElementById('cfgRadius').value=gConfig.gpsRadius;
+  showScreen('scrAdmin');
+  // auto-seed both question sets if empty
+  db.collection('questions').limit(1).get().then(function(s){
+    if(s.empty){
+      var b=db.batch();
+      DEF_Q.concat(DEF_Q_STORE).forEach(function(q){ b.set(db.collection('questions').doc(),q); });
+      b.commit();
+    }
+  });
+  navTo('dashboard');
+}
+
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sbOverlay').classList.toggle('show'); }
+
+var PAGES=['dashboard','submissions','stores','questions','storeview','emailpush','settings'];
+var PAGE_TITLES={dashboard:'Dashboard',submissions:'Submissions',stores:'Stores',questions:'Questions',storeview:'User View',emailpush:'Email Push',settings:'Settings'};
+function navTo(pg){
+  PAGES.forEach(function(p){
+    var el=document.getElementById('page'+cap(p)); if(el) el.classList.toggle('active',p===pg);
+    var nav=document.querySelector('.nav-item[data-pg="'+p+'"]'); if(nav) nav.classList.toggle('active',p===pg);
+  });
+  document.getElementById('topTitle').textContent=PAGE_TITLES[pg]||pg;
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  if(pg==='dashboard') loadDash();
+  if(pg==='submissions') loadSubs();
+  if(pg==='stores') loadStores();
+  if(pg==='questions') loadQuestions();
+  if(pg==='storeview') loadPreview();
+  if(pg==='emailpush') {}
+  if(pg==='settings') loadSettings();
+}
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+// ════════════════════ MOBILE FLOW (AM / STORE) ════════════════════
+function startMobile(role){
+  gReview.type=role;
+  showScreen('scrMobile');
+  document.getElementById('scrMobile').style.display='flex';
+  if(gConfig.testMode) document.getElementById('mTestBanner').classList.remove('hidden');
+  document.getElementById('mTitle').textContent=role==='AM'?'Daily Discipline Review':'Store Daily Checklist';
+  var h=new Date().getHours();
+  document.getElementById('mTag').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', '+(gProfile.name||'').split(' ')[0];
+  document.getElementById('mListLbl').textContent=role==='AM'?'YOUR STORES':'YOUR STORE';
+  initGPS();
+  loadMobileStores(role);
+  loadMobileQuestions(role);
+}
+
+function initGPS(){
+  if(!navigator.geolocation){ document.getElementById('mGps').textContent='📍 No GPS'; return; }
+  navigator.geolocation.watchPosition(function(p){
+    gGPS={lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)};
+    document.getElementById('mGps').textContent='📍 ±'+gGPS.acc+'m';
+    renderMobileStores();
+  },function(){ document.getElementById('mGps').textContent='📍 GPS error'; },{enableHighAccuracy:true,maximumAge:15000});
+}
+
+function loadMobileStores(role){
+  showLoader('Loading…');
+  db.collection('stores').where('isActive','==',true).get().then(function(snap){
+    gStores=[]; snap.forEach(function(d){ gStores.push(Object.assign({id:d.id},d.data())); });
+    if(role==='AM') gStores=gStores.filter(function(s){ return String(s.amCode)===String(gProfile.amCode); });
+    else gStores=gStores.filter(function(s){ return String(s.storeCode)===String(gProfile.storeCode); });
+    renderMobileStores();
+    hideLoader();
+  }).catch(function(e){ hideLoader(); showToast('Error: '+e.message); });
+}
+
+function loadMobileQuestions(role){
+  db.collection('questions').where('isActive','==',true).get().then(function(snap){
+    gQuestions=[]; snap.forEach(function(d){ var q=Object.assign({id:d.id},d.data()); if((q.reviewType||'AM')===role) gQuestions.push(q); });
+    gQuestions.sort(function(a,b){ return (a.sortOrder||0)-(b.sortOrder||0); });
+  });
+}
+
+function renderMobileStores(){
+  var today=toDateStr(addDays(new Date(),-1)), role=gReview.type;
+  var field=role==='AM'?'amCode':'storeCode', val=role==='AM'?gProfile.amCode:gProfile.storeCode;
+  db.collection('submissions').where('reviewDate','==',today).get().then(function(snap){
+    var done={},skip={},comp={};
+    snap.forEach(function(d){ var s=d.data(); if(s.reviewType!==role) return; if(String(s[field])!==String(val)) return; if(s.isSkipped) skip[s.storeCode]=true; else { done[s.storeCode]=true; comp[s.storeCode]=s.overallCompliance||0; } });
+    var R=gConfig.gpsRadius||100;
+    var list=gStores.map(function(st){
+      var dist=gGPS&&st.latitude&&st.longitude?haversine(gGPS.lat,gGPS.lng,st.latitude,st.longitude):null;
+      var status=done[st.storeCode]?'done':skip[st.storeCode]?'skipped':dist===null?'pending':dist<=R?'near':dist<=2000?'mid':'far';
+      return Object.assign({},st,{dist:dist,status:status,comp:comp[st.storeCode]!=null?comp[st.storeCode]:null});
+    });
+    list.sort(function(a,b){ var o={near:0,mid:1,pending:2,far:3,done:4,skipped:5}; return (o[a.status]-o[b.status])||((a.dist||9e9)-(b.dist||9e9)); });
+    // stats
+    var dn=Object.keys(done).length,sk=Object.keys(skip).length,tot=gStores.length;
+    var cv=Object.values(comp), avg=cv.length?Math.round(cv.reduce(function(a,b){return a+b;},0)/cv.length):0;
+    document.getElementById('mTotal').textContent=tot;
+    document.getElementById('mDone').textContent=dn;
+    document.getElementById('mSkip').textContent=sk;
+    document.getElementById('mComp').textContent=(dn?avg:0)+'%';
+    var pct=tot?Math.round((dn+sk)/tot*100):0;
+    document.getElementById('mProgTxt').textContent=(dn+sk)+' / '+tot;
+    document.getElementById('mProgFill').style.width=pct+'%';
+    // nearest banner (auto store pick by lat/long)
+    var html='';
+    var nearest=list.find(function(s){ return s.status==='near'; });
+    if(nearest){
+      html+='<div class="near-banner" onclick="openStore(\''+nearest.storeCode+'\')">'+
+        '<div class="near-banner-info"><div class="near-banner-lbl">📍 Nearest Store</div><div class="near-banner-name">'+nearest.storeCode+' · '+nearest.storeName+'</div><div class="near-banner-dist">'+fmtDist(nearest.dist)+' away · tap to start</div></div>'+
+        '<div style="background:#fff;color:var(--green);border-radius:8px;padding:8px 14px;font-weight:700;font-size:13px;flex-shrink:0">Start →</div>'+
+      '</div>';
+    }
+    list.forEach(function(st){
+      var col={near:'#43A047',mid:'#FB8C00',pending:'#1565C0',far:'#9E9E9E',done:'#43A047',skipped:'#FB8C00'}[st.status];
+      var distH=st.dist!=null?'<span class="badge '+(st.dist<=R?'badge-green':st.dist<=2000?'badge-amber':'badge-gray')+'">📍 '+fmtDist(st.dist)+'</span>':'';
+      var statH=st.status==='done'?'<span class="badge badge-green">✓ '+(st.comp!=null?st.comp+'%':'Done')+'</span>':st.status==='skipped'?'<span class="badge badge-amber">⏭ Skipped</span>':st.status==='far'?'<span class="badge badge-gray">Far</span>':'';
+      var click=(['near','mid','pending'].indexOf(st.status)>-1||st.dist===null||gConfig.testMode);
+      html+='<div class="s-card" style="opacity:'+(st.status==='far'&&!gConfig.testMode?'.5':'1')+'"'+(click?' onclick="openStore(\''+st.storeCode+'\')"':'')+'>'+
+        '<div class="s-card-accent" style="background:'+col+'"></div>'+
+        '<div class="s-card-in"><div class="s-card-top">'+
+          '<div><div class="s-card-code">'+st.storeCode+'</div><div class="s-card-name">'+st.storeName+'</div><div class="s-card-loc">'+(st.city?st.city+', ':'')+(st.state||'')+'</div></div>'+
+          '<div class="s-card-right">'+distH+statH+'</div>'+
+        '</div></div>'+
+      '</div>';
+    });
+    if(!html) html='<div class="empty"><div class="empty-i">🏪</div><div class="empty-t">No stores assigned</div><div class="empty-s">Code: '+(val||'—')+'</div></div>';
+    document.getElementById('mStoreList').innerHTML=html;
+  });
+}
+
+function openStore(code){
+  var st=gStores.find(function(s){ return s.storeCode===code; });
+  if(!st) return;
+  var R=gConfig.gpsRadius||100;
+  if(!gConfig.testMode && gGPS && st.latitude && st.longitude){
+    var d=haversine(gGPS.lat,gGPS.lng,st.latitude,st.longitude);
+    if(d>R){ document.getElementById('rangeDetail').textContent='You are '+fmtDist(d)+' away · need ≤'+R+'m'; showOv('ovRange'); return; }
+  }
+  startReview(st);
+}
+
+// ════════════════════ REVIEW FLOW ════════════════════
+function startReview(store){
+  if(!gQuestions.length){ showToast('Questions loading…'); loadMobileQuestions(gReview.type); return; }
+  gReview.store=store;
+  gReview.answers=gQuestions.map(function(){ return {status:null,remarks:'',fd:{},photo:null}; });
+  gReview.mainPhoto=null;
+  document.getElementById('rvTitle').textContent=store.storeCode;
+  document.getElementById('rvStrip').textContent=store.storeName+(store.city?' · '+store.city:'');
+  document.getElementById('rvDate').textContent='For '+toDateStr(addDays(new Date(),-1));
+  document.getElementById('rvSubmit').disabled=false;
+  if(gConfig.testMode) document.getElementById('rvTestBanner').classList.remove('hidden');
+  showScreen('scrReview'); document.getElementById('scrReview').style.display='flex';
+  renderReview();
+}
+
+function renderReview(){
+  var ans=gReview.answers.filter(function(a){return a.status!==null;}).length, tot=gQuestions.length;
+  document.getElementById('rvProgTxt').textContent=ans+' / '+tot;
+  document.getElementById('rvProgFill').style.width=(tot?Math.round(ans/tot*100):0)+'%';
+  var html='';
+  gQuestions.forEach(function(q,i){
+    var a=gReview.answers[i], st=a.status, isNC=st==='nc';
+    var noCls=st==='c'?'done':st==='nc'?'nc':st==='na'?'na':'';
+    html+='<div class="q-card" id="qc'+i+'">'+
+      '<div class="q-card-head"><div class="q-no '+noCls+'">'+(i+1)+'</div>'+
+        '<div class="q-q"><div class="q-q-title">'+q.sectionTitle+'</div>'+
+        (q.subPoints?'<div class="q-q-sub">'+q.subPoints.split(',').map(function(s){return s.trim();}).filter(Boolean).join(' · ')+'</div>':'')+'</div>'+
+        (q.requiresPhoto?'<span class="badge badge-pink">📷</span>':'')+(q.requiresFurtherDetails?'<span class="badge badge-blue">FD</span>':'')+
+      '</div>'+
+      '<div class="ans-row">'+
+        '<button class="ans-btn yes'+(st==='c'?' sel':'')+'" onclick="setAns('+i+',\'c\')">✓ Done</button>'+
+        '<button class="ans-btn no'+(st==='nc'?' sel':'')+'" onclick="setAns('+i+',\'nc\')">✗ Not Done</button>'+
+        '<button class="ans-btn na'+(st==='na'?' sel':'')+'" onclick="setAns('+i+',\'na\')">NA</button>'+
+      '</div>'+
+      '<div class="rem-wrap"><span class="rem-lbl">Remarks / Observation</span><textarea class="rem-ta" id="rem'+i+'" placeholder="Add remarks…" onchange="saveRem('+i+')" onblur="saveRem('+i+')">'+esc(a.remarks||'')+'</textarea></div>';
+    if(isNC&&q.requiresFurtherDetails){
+      var fd=a.fd||{};
+      html+='<div class="fd-box"><div class="fd-t">📋 Further Details</div><div class="fd-g">'+
+        '<div><div class="fd-l">PI MC</div><input class="fd-i" id="fdMC'+i+'" value="'+esc(fd.piMC||'')+'"></div>'+
+        '<div><div class="fd-l">System Qty</div><input class="fd-i" id="fdSQ'+i+'" type="number" value="'+esc(fd.sysQty||'')+'" oninput="calcSh('+i+')"></div>'+
+        '<div><div class="fd-l">Physical Qty</div><input class="fd-i" id="fdPQ'+i+'" type="number" value="'+esc(fd.phyQty||'')+'" oninput="calcSh('+i+')"></div>'+
+        '<div><div class="fd-l">Shrink %</div><div class="fd-ro" id="fdSH'+i+'">'+(fd.shrink||'—')+'</div></div>'+
+      '</div><button class="btn btn-blue btn-sm btn-full mt-2" onclick="saveFD('+i+')">Save Details</button></div>';
+    }
+    if(q.requiresPhoto){
+      html+='<div class="ph-box">'+(a.photo?'<img class="ph-img" src="'+a.photo+'"><button class="btn btn-outline btn-sm btn-full" onclick="openCam(\'q'+i+'\')">🔄 Retake</button>':'<div class="ph-drop" onclick="openCam(\'q'+i+'\')">📷<div class="small text2 mt-2">Tap to take required photo</div></div>')+'</div>';
+    }
+    html+='</div>';
+  });
+  html+='<div class="q-card"><div class="q-card-head"><div class="q-no" style="background:var(--pink)">📸</div><div class="q-q"><div class="q-q-title">Verification Photo <span style="color:var(--red);font-size:11px">*Required</span></div><div class="q-q-sub">Overall store photo</div></div></div>'+
+    '<div class="ph-box">'+(gReview.mainPhoto?'<img class="ph-img" src="'+gReview.mainPhoto+'"><button class="btn btn-outline btn-sm btn-full" onclick="openCam(\'main\')">🔄 Retake</button>':'<div class="ph-drop" onclick="openCam(\'main\')">📸<div class="small text2 mt-2">Tap to take verification photo</div></div>')+'</div></div>';
+  document.getElementById('rvList').innerHTML=html;
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function setAns(i,s){ gReview.answers[i].status=s; renderReview(); setTimeout(function(){var e=document.getElementById('qc'+i);if(e)e.scrollIntoView({behavior:'smooth',block:'nearest'});},50); }
+function saveRem(i){ var e=document.getElementById('rem'+i); if(e) gReview.answers[i].remarks=e.value; }
+function calcSh(i){ var s=parseFloat(document.getElementById('fdSQ'+i).value)||0,p=parseFloat(document.getElementById('fdPQ'+i).value)||0,e=document.getElementById('fdSH'+i); if(e)e.textContent=s>0?((s-p)/s*100).toFixed(1)+'%':'—'; }
+function saveFD(i){ gReview.answers[i].fd={piMC:(document.getElementById('fdMC'+i)||{}).value||'',sysQty:(document.getElementById('fdSQ'+i)||{}).value||'',phyQty:(document.getElementById('fdPQ'+i)||{}).value||'',shrink:(document.getElementById('fdSH'+i)||{}).textContent||''}; showToast('Saved ✓'); }
+function backToDash(){ closeCam(); showScreen('scrMobile'); document.getElementById('scrMobile').style.display='flex'; renderMobileStores(); }
+
+// ════ CAMERA ════
+function openCam(t){
+  gCamTarget=t; document.getElementById('camTitle').textContent=t==='main'?'Verification Photo':'Section Photo';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ showToast('Camera unavailable'); return; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false}).then(function(st){
+    gCamStream=st; document.getElementById('camVid').srcObject=st; showOv('ovCam');
+    gCamTick=setInterval(function(){ var e=document.getElementById('camTs'); if(e)e.textContent=new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}); },1000);
+  }).catch(function(e){ showToast('Camera: '+e.message); });
+}
+function capturePhoto(){
+  var v=document.getElementById('camVid'),W=v.videoWidth||640,H=v.videoHeight||480,c=document.createElement('canvas');
+  c.width=W;c.height=H; var x=c.getContext('2d'); x.drawImage(v,0,0,W,H);
+  var bh=Math.round(H*0.085); x.fillStyle='rgba(0,0,0,.65)'; x.fillRect(0,H-bh,W,bh); x.fillStyle='#fff';
+  x.font='bold '+Math.round(bh*0.33)+'px Roboto,sans-serif';
+  var s=gReview.store||{},g=gGPS?gGPS.lat.toFixed(5)+','+gGPS.lng.toFixed(5):'GPS N/A',n=gProfile.name||'';
+  var ts=new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+  x.fillText(s.storeCode+' – '+s.storeName,W*0.01,H-bh+bh*0.42);
+  x.fillText(g+' | '+n+' | '+ts,W*0.01,H-bh+bh*0.82);
+  var q=0.82,u; do{ u=c.toDataURL('image/jpeg',q); q-=0.08; }while(u.length>80000&&q>0.15);
+  closeCam();
+  if(gCamTarget==='main') gReview.mainPhoto=u; else if(gCamTarget&&gCamTarget[0]==='q') gReview.answers[parseInt(gCamTarget.substring(1))].photo=u;
+  renderReview(); showToast('Photo captured ✓');
+}
+function closeCam(){ if(gCamStream){gCamStream.getTracks().forEach(function(t){t.stop();});gCamStream=null;} if(gCamTick){clearInterval(gCamTick);gCamTick=null;} closeOv('ovCam'); }
+
+// ════ SKIP ════
+function openSkip(){ document.getElementById('skipReason').value=''; document.getElementById('skipErr').style.display='none'; showOv('ovSkip'); }
+function confirmSkip(){
+  var r=document.getElementById('skipReason').value.trim();
+  if(r.length<10){ document.getElementById('skipErr').style.display=''; return; }
+  closeOv('ovSkip'); showLoader('Saving…');
+  var s=gReview.store;
+  db.collection('submissions').add({storeCode:s.storeCode,storeName:s.storeName,smName:s.smName||'',amCode:String(s.amCode||''),amName:gProfile.name||'',zfmCode:s.zfmCode||'',zfmEmail:s.zfmEmail||'',submittedBy:(gProfile.code||''),reviewType:gReview.type,reviewDate:toDateStr(addDays(new Date(),-1)),isSkipped:true,skipReason:r,submittedAt:firebase.firestore.FieldValue.serverTimestamp()})
+  .then(function(){ hideLoader(); backToDash(); showToast('Store skipped'); }).catch(function(e){ hideLoader(); showToast(e.message); });
+}
+
+// ════ SUBMIT ════
+function doSubmit(){
+  gQuestions.forEach(function(_,i){ saveRem(i); });
+  if(!gReview.mainPhoto){ showToast('Verification photo required'); return; }
+  var un=gReview.answers.filter(function(a){return a.status===null;}).length;
+  if(un>0){ showToast(un+' question(s) unanswered'); return; }
+  var scored=gReview.answers.filter(function(a){return a.status==='c'||a.status==='nc';});
+  var comp=gReview.answers.filter(function(a){return a.status==='c';}).length;
+  var pct=scored.length?Math.round(comp/scored.length*100):100;
+  var s=gReview.store,today=toDateStr(addDays(new Date(),-1)),ref='REV-'+s.storeCode+'-'+today.replace(/-/g,'');
+  document.getElementById('rvSubmit').disabled=true; showLoader('Submitting…');
+  var arr=gReview.answers.map(function(a,i){ return {questionId:gQuestions[i].id,sectionTitle:gQuestions[i].sectionTitle,status:a.status,remarks:a.remarks||'',fd:a.fd||{},photo:a.photo||null}; });
+  db.collection('submissions').add({storeCode:s.storeCode,storeName:s.storeName,smName:s.smName||'',amCode:String(s.amCode||''),amName:gProfile.name||'',zfmCode:s.zfmCode||'',zfmEmail:s.zfmEmail||'',submittedBy:(gProfile.code||''),reviewType:gReview.type,reviewDate:today,answers:arr,overallCompliance:pct,mainPhoto:gReview.mainPhoto,latitude:gGPS?gGPS.lat:null,longitude:gGPS?gGPS.lng:null,isSkipped:false,refNo:ref,submittedAt:firebase.firestore.FieldValue.serverTimestamp()})
+  .then(function(){
+    hideLoader();
+    var nc=arr.filter(function(a){return a.status==='nc';});
+    if(nc.length) sendZFMAlert({store:s,amName:gProfile.name||'AM',date:today,pct:pct,nc:nc,ref:ref});
+    document.getElementById('scRef').textContent=ref;
+    document.getElementById('scComp').textContent='Compliance: '+pct+'%';
+    document.getElementById('scNC').textContent=nc.length?nc.length+' NC section(s) · ZFM email opened':'All compliant ✓';
+    showScreen('scrSuccess');
+  }).catch(function(e){ hideLoader(); showToast(e.message); document.getElementById('rvSubmit').disabled=false; });
+}
+
+function sendZFMAlert(d){
+  var to=gConfig.testMode?(gConfig.testMail||DEFAULT_FROM):(d.store.zfmEmail||'');
+  if(!to) return;
+  var cc=gConfig.testMode?'':(d.store.amMail||'');
+  var lines=[];
+  lines.push('Non-Compliance Alert — '+d.store.storeCode+' '+d.store.storeName);
+  lines.push('Review Date: '+d.date+'    Compliance: '+d.pct+'%');
+  lines.push('Reviewed by: '+d.amName+'    Ref: '+d.ref);
+  lines.push('');
+  lines.push('Non-Compliant Sections:');
+  d.nc.forEach(function(s,i){ lines.push('  '+(i+1)+'. '+s.sectionTitle+(s.remarks?' — '+s.remarks:'')); });
+  lines.push('');
+  lines.push('Please action and revert. — VMM Daily Discipline Review');
+  var url='mailto:'+encodeURIComponent(to)+(cc?'?cc='+encodeURIComponent(cc)+'&':'?')+'subject='+encodeURIComponent('NC Alert | '+d.store.storeCode+' | '+d.date)+'&body='+encodeURIComponent(lines.join('\r\n'));
+  // open compose without navigating away from the success screen
+  var a=document.createElement('a'); a.href=url; a.target='_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  showToast('ZFM email opened'+(gConfig.testMode?' (test)':''));
+}
+
+// ════════════════════ DASHBOARD ════════════════════
+function clearDash(){ var t=toDateStr(addDays(new Date(),-1)); document.getElementById('dFrom').value=t; document.getElementById('dTo').value=t; loadDash(); }
+function loadDash(){
+  var from=document.getElementById('dFrom').value||toDateStr(addDays(new Date(),-1));
+  var to=document.getElementById('dTo').value||toDateStr(addDays(new Date(),-1));
+  var type=document.getElementById('dType').value;
+  document.getElementById('dPeriod').textContent=from+' to '+to;
+  document.getElementById('dSummaryTitle').textContent=(type==='AM'?'AM Review':'Store Checklist')+' — Question-wise Summary';
+  showLoader('Loading dashboard…');
+  Promise.all([
+    db.collection('stores').where('isActive','==',true).get(),
+    db.collection('submissions').where('reviewDate','>=',from).where('reviewDate','<=',to).get() // single-field range → no composite index needed
+  ]).then(function(res){
+    hideLoader();
+    var stores=[]; res[0].forEach(function(d){ stores.push(d.data()); });
+    var allSubs=[]; res[1].forEach(function(d){ allSubs.push(d.data()); }); // both types
+    var subs=allSubs.filter(function(s){return s.reviewType===type;});       // selected type only
+    gDashCache=subs;
+    var filled=subs.filter(function(s){return !s.isSkipped;});
+    var subStoreCodes={}; subs.forEach(function(s){ subStoreCodes[s.storeCode]=true; });
+    var totalStores=stores.length;
+    var submitted=Object.keys(subStoreCodes).length;
+    var pending=Math.max(0,totalStores-submitted);
+    var comps=filled.map(function(s){return s.overallCompliance||0;});
+    var avg=comps.length?Math.round(comps.reduce(function(a,b){return a+b;},0)/comps.length):0;
+    var amSet={}; stores.forEach(function(s){ var c=String(s.amCode||'').trim(); if(c&&c!=='#N/A') amSet[c]=true; });
+    var totalAMs=Object.keys(amSet).length;
+    var fill=totalStores?Math.round(submitted/totalStores*100):0;
+    document.getElementById('dTotal').textContent=totalStores;
+    document.getElementById('dAMs').textContent=totalAMs;
+    document.getElementById('dSub').textContent=submitted;
+    document.getElementById('dPend').textContent=pending;
+    document.getElementById('dFill').textContent=fill+'%';
+    document.getElementById('dPct').textContent=avg+'%';
+    document.getElementById('dStoreCount').textContent=subs.length+' entries';
+    renderCharts(filled);
+    renderQSummary(filled,type);
+    renderCoverage(stores,allSubs);
+    renderDashStores(subs);
+  }).catch(function(e){ hideLoader(); showToast(e.message); });
+}
+
+// ── ZFM / AM coverage table (combines AM Field reviews + Store self-fills) ──
+function renderCoverage(stores,allSubs){
+  // index submissions by storeCode → {am:bool, store:bool, comps:[]}
+  var sub={};
+  allSubs.forEach(function(s){
+    if(s.isSkipped) return;
+    var k=s.storeCode; if(!sub[k]) sub[k]={am:false,store:false,comps:[]};
+    if(s.reviewType==='AM') sub[k].am=true; else if(s.reviewType==='STORE') sub[k].store=true;
+    if(typeof s.overallCompliance==='number') sub[k].comps.push(s.overallCompliance);
+  });
+  // aggregate per AM
+  var am={};
+  stores.forEach(function(st){
+    var ac=String(st.amCode||'').trim()||'#N/A';
+    if(!am[ac]) am[ac]={zfm:String(st.zfmCode||'')||'—',rgn:st.state||st.city||'—',amName:st.amName||'',code:ac,total:0,amField:0,storeFilled:0,filledSet:{},comps:[]};
+    var a=am[ac]; a.total++;
+    if(!a.amName&&st.amName) a.amName=st.amName;
+    var s=sub[st.storeCode];
+    if(s){
+      if(s.am) a.amField++;
+      if(s.store) a.storeFilled++;
+      if(s.am||s.store) a.filledSet[st.storeCode]=true;
+      a.comps=a.comps.concat(s.comps);
+    }
+  });
+  var rows=Object.keys(am).map(function(k){return am[k];});
+  rows.sort(function(a,b){ return (a.zfm+a.amName).localeCompare(b.zfm+b.amName); });
+  if(!rows.length){ document.getElementById('dCoverageTbl').innerHTML='<div class="empty"><div class="empty-i">📭</div><div class="empty-t">No stores</div></div>'; return; }
+  var h='<table class="tbl"><thead><tr>'+
+    '<th>ZFM / Sr RFM</th><th>RGN</th><th>AM Name</th><th>AM E-Code</th>'+
+    '<th style="text-align:center">#Store</th><th style="text-align:center">AM Field</th>'+
+    '<th style="text-align:center">Rest St Filled</th><th style="text-align:center">Fill%</th>'+
+    '<th style="text-align:center">Compliance%</th></tr></thead><tbody>';
+  var lastZfm=null;
+  rows.forEach(function(a){
+    var filled=Object.keys(a.filledSet).length;
+    var fillpct=a.total?Math.round(filled/a.total*100):0;
+    var comp=a.comps.length?Math.round(a.comps.reduce(function(x,y){return x+y;},0)/a.comps.length):0;
+    var fc=fillpct>=80?'var(--green)':fillpct>=50?'var(--amber)':'var(--red)';
+    var cc=comp>=80?'var(--green)':comp>=60?'var(--amber)':'var(--red)';
+    var zfmShow=(a.zfm!==lastZfm); lastZfm=a.zfm;
+    h+='<tr>'+
+      '<td style="font-weight:'+(zfmShow?'700':'400')+';color:'+(zfmShow?'var(--blue-d)':'var(--text3)')+'">'+(zfmShow?a.zfm:'〃')+'</td>'+
+      '<td class="small">'+a.rgn+'</td>'+
+      '<td>'+(a.amName||'—')+'</td>'+
+      '<td class="mono small">'+a.code+'</td>'+
+      '<td style="text-align:center">'+a.total+'</td>'+
+      '<td style="text-align:center"><span class="badge badge-blue">'+a.amField+'</span></td>'+
+      '<td style="text-align:center"><span class="badge badge-pink">'+a.storeFilled+'</span></td>'+
+      '<td style="text-align:center;font-weight:700;color:'+fc+'">'+fillpct+'%</td>'+
+      '<td style="text-align:center;font-weight:700;color:'+cc+'">'+(a.comps.length?comp+'%':'—')+'</td>'+
+    '</tr>';
+  });
+  h+='</tbody></table>';
+  document.getElementById('dCoverageTbl').innerHTML=h;
+  document.getElementById('covNote').textContent=rows.length+' AMs · AM Field = stores AM reviewed · Rest St Filled = stores self-submitted';
+}
+
+function renderCharts(filled){
+  var amMap={};
+  filled.forEach(function(s){ if(!amMap[s.amCode])amMap[s.amCode]={sum:0,c:0}; amMap[s.amCode].sum+=(s.overallCompliance||0); amMap[s.amCode].c++; });
+  var L=[],D=[],C=[];
+  Object.keys(amMap).sort().forEach(function(k){ var p=Math.round(amMap[k].sum/amMap[k].c); L.push(k);D.push(p);C.push(p>=80?'#43A047':p>=60?'#FB8C00':'#E53935'); });
+  if(gChartAM)gChartAM.destroy();
+  gChartAM=new Chart(document.getElementById('chartAM').getContext('2d'),{type:'bar',data:{labels:L.length?L:['No Data'],datasets:[{data:D.length?D:[0],backgroundColor:C.length?C:['#EEE'],borderRadius:4}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:100,ticks:{callback:function(v){return v+'%';}}}}}});
+  var nc={};
+  filled.forEach(function(s){ (s.answers||[]).forEach(function(a){ if(a.status==='nc')nc[a.sectionTitle]=(nc[a.sectionTitle]||0)+1; }); });
+  var nL=[],nD=[];
+  Object.keys(nc).sort(function(a,b){return nc[b]-nc[a];}).slice(0,7).forEach(function(k){ nL.push(k.length>20?k.substring(0,18)+'…':k); nD.push(nc[k]); });
+  if(gChartNC)gChartNC.destroy();
+  gChartNC=new Chart(document.getElementById('chartNC').getContext('2d'),{type:'bar',data:{labels:nL.length?nL:['No NC'],datasets:[{data:nD.length?nD:[0],backgroundColor:'#E91E8C',borderRadius:4}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{stepSize:1}}}}});
+}
+
+function renderQSummary(filled,type){
+  // aggregate per question section
+  var qs=gAllQuestions.filter(function(q){return (q.reviewType||'AM')===type;}).sort(function(a,b){return (a.sortOrder||0)-(b.sortOrder||0);});
+  if(!qs.length){ document.getElementById('dSummaryTbl').innerHTML='<div class="empty"><div class="empty-i">📊</div><div class="empty-t">Questions not loaded</div></div>'; return; }
+  var agg={}; qs.forEach(function(q){ agg[q.sectionTitle]={c:0,nc:0,na:0}; });
+  filled.forEach(function(s){ (s.answers||[]).forEach(function(a){ if(!agg[a.sectionTitle])agg[a.sectionTitle]={c:0,nc:0,na:0}; if(a.status==='c')agg[a.sectionTitle].c++; else if(a.status==='nc')agg[a.sectionTitle].nc++; else if(a.status==='na')agg[a.sectionTitle].na++; }); });
+  var rows=qs.map(function(q){ var g=agg[q.sectionTitle]||{c:0,nc:0,na:0};
+    return '<tr><td>'+q.sectionTitle+'</td><td style="text-align:center;color:var(--green);font-weight:700">'+g.c+'</td><td style="text-align:center;color:var(--red);font-weight:700">'+g.nc+'</td><td style="text-align:center;color:var(--gray)">'+g.na+'</td><td style="text-align:center">'+((g.c+g.nc)>0?Math.round(g.c/(g.c+g.nc)*100)+'%':'—')+'</td></tr>';
+  }).join('');
+  document.getElementById('dSummaryTbl').innerHTML='<table class="tbl"><thead><tr><th>Section</th><th style="text-align:center">Done</th><th style="text-align:center">Not Done</th><th style="text-align:center">NA</th><th style="text-align:center">Compliance%</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function renderDashStores(subs){
+  if(!subs.length){ document.getElementById('dStoreTbl').innerHTML='<div class="empty"><div class="empty-i">📋</div><div class="empty-t">No submissions in range</div></div>'; return; }
+  subs.sort(function(a,b){return (a.overallCompliance||0)-(b.overallCompliance||0);});
+  var rows=subs.map(function(s){
+    var pct=s.isSkipped?null:s.overallCompliance||0;
+    var badge=s.isSkipped?'<span class="badge badge-amber">Skipped</span>':'<span class="badge '+(pct>=80?'badge-green':pct>=60?'badge-amber':'badge-red')+'">'+pct+'%</span>';
+    var ncL=(!s.isSkipped&&s.answers)?s.answers.filter(function(a){return a.status==='nc';}).map(function(a){return a.sectionTitle;}).join(', '):'';
+    return '<tr><td class="mono" style="color:var(--blue);font-weight:700">'+s.storeCode+'</td><td>'+s.storeName+'</td><td class="mono small">'+s.amCode+'</td><td>'+s.reviewDate+'</td><td>'+badge+'</td><td class="small" style="color:var(--red);max-width:240px">'+ncL+'</td><td><button class="btn btn-outline btn-xs" onclick="viewSub(\''+s.refNo+'\')">View</button></td></tr>';
+  }).join('');
+  document.getElementById('dStoreTbl').innerHTML='<table class="tbl"><thead><tr><th>Code</th><th>Store</th><th>AM</th><th>Date</th><th>Status</th><th>NC Sections</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function filterDashStatus(which){ navTo('submissions'); }
+
+function exportDashCSV(){
+  var rows=[['StoreCode','StoreName','AMCode','AMName','Date','Type','Compliance%','Skipped','NCSections','RefNo']];
+  gDashCache.forEach(function(s){
+    var nc=(!s.isSkipped&&s.answers)?s.answers.filter(function(a){return a.status==='nc';}).map(function(a){return a.sectionTitle;}).join('|'):'';
+    rows.push([s.storeCode,s.storeName,s.amCode,s.amName||'',s.reviewDate,s.reviewType,s.overallCompliance||'',s.isSkipped?'Yes':'No',nc,s.refNo||'']);
+  });
+  downloadCSV(rows,'Dashboard_'+toDateStr(new Date())+'.csv');
+}
+
+// ════════════════════ SUBMISSIONS ════════════════════
+function loadSubs(){
+  var date=document.getElementById('subDate').value||toDateStr(addDays(new Date(),-1));
+  var type=document.getElementById('subType').value;
+  db.collection('submissions').where('reviewDate','==',date).get().then(function(snap){
+    var subs=[]; snap.forEach(function(d){ var x=d.data(); if(x.reviewType===type) subs.push(Object.assign({id:d.id},x)); });
+    subs.sort(function(a,b){return (a.storeCode||'').localeCompare(b.storeCode||'');});
+    if(!subs.length){ document.getElementById('subList').innerHTML='<div class="empty"><div class="empty-i">📄</div><div class="empty-t">No submissions</div><div class="empty-s">'+date+'</div></div>'; return; }
+    document.getElementById('subList').innerHTML=subs.map(function(s){
+      var pct=s.isSkipped?null:s.overallCompliance||0;
+      var b=s.isSkipped?'<span class="badge badge-amber">Skipped</span>':'<span class="badge '+(pct>=80?'badge-green':pct>=60?'badge-amber':'badge-red')+'">'+pct+'%</span>';
+      return '<div class="lrow click" onclick="viewSub(\''+s.id+'\')"><div class="linfo"><div class="lname">'+s.storeCode+' · '+s.storeName+'</div><div class="lsub">AM: '+s.amCode+' · '+s.reviewDate+(s.refNo?' · '+s.refNo:'')+'</div></div>'+b+'<span class="text3">›</span></div>';
+    }).join('');
+  });
+}
+
+function viewSub(idOrRef){
+  db.collection('submissions').doc(idOrRef).get().then(function(snap){
+    if(snap.exists) return snap;
+    return db.collection('submissions').where('refNo','==',idOrRef).limit(1).get().then(function(r){return r.docs[0]||null;});
+  }).then(function(snap){
+    var s=snap&&snap.data?snap.data():null; if(!s){ showToast('Not found'); return; }
+    document.getElementById('subDetTitle').textContent=s.storeCode+' · '+s.reviewDate;
+    var h='<div style="font-size:13px;line-height:2">';
+    h+='<div><strong>Store:</strong> '+s.storeCode+' – '+s.storeName+'</div>';
+    h+='<div><strong>AM:</strong> '+s.amCode+(s.amName?' ('+s.amName+')':'')+'</div>';
+    h+='<div><strong>Compliance:</strong> '+(s.isSkipped?'Skipped':s.overallCompliance+'%')+'</div>';
+    h+='<div><strong>Ref:</strong> <span class="mono">'+(s.refNo||'—')+'</span></div>';
+    h+='<div><strong>GPS:</strong> '+(s.latitude?s.latitude.toFixed(5)+', '+s.longitude.toFixed(5):'N/A')+'</div></div>';
+    if(s.isSkipped) h+='<div class="warn-box mt-3">Skip reason: '+s.skipReason+'</div>';
+    else if(s.answers){
+      h+='<table class="tbl mt-3"><thead><tr><th>Section</th><th>Status</th><th>Remarks</th></tr></thead><tbody>';
+      s.answers.forEach(function(a){
+        var c=a.status==='c'?'var(--green)':a.status==='nc'?'var(--red)':'var(--gray)';
+        var l=a.status==='c'?'✓ Done':a.status==='nc'?'✗ Not Done':'NA';
+        h+='<tr><td>'+a.sectionTitle+'</td><td style="color:'+c+';font-weight:700">'+l+'</td><td class="small">'+(a.remarks||'—')+'</td></tr>';
+      });
+      h+='</tbody></table>';
+    }
+    if(s.mainPhoto) h+='<div class="mt-3"><img src="'+s.mainPhoto+'" style="width:100%;border-radius:8px;border:1px solid var(--border)"></div>';
+    document.getElementById('subDetBody').innerHTML=h; showOv('ovSub');
+  });
+}
+
+function exportSubCSV(){
+  var date=document.getElementById('subDate').value||toDateStr(addDays(new Date(),-1));
+  var type=document.getElementById('subType').value;
+  db.collection('submissions').where('reviewDate','==',date).get().then(function(snap){
+    var rows=[['StoreCode','StoreName','AMCode','Date','Compliance%','Skipped','RefNo']];
+    snap.forEach(function(d){ var s=d.data(); if(s.reviewType!==type) return; rows.push([s.storeCode,s.storeName,s.amCode,s.reviewDate,s.overallCompliance||'',s.isSkipped?'Yes':'No',s.refNo||'']); });
+    downloadCSV(rows,'Submissions_'+date+'.csv');
+  });
+}
+
+// ════════════════════ STORES ════════════════════
+function loadStores(){
+  db.collection('stores').orderBy('storeCode').get().then(function(snap){
+    gStores=[]; snap.forEach(function(d){ gStores.push(Object.assign({id:d.id},d.data())); });
+    document.getElementById('storeCount').textContent=gStores.length+' stores';
+    renderStores();
+  });
+}
+function renderStores(){
+  var q=(document.getElementById('storeSearch').value||'').toLowerCase();
+  var list=gStores.filter(function(s){ return !q||(s.storeCode||'').toLowerCase().indexOf(q)>-1||(s.storeName||'').toLowerCase().indexOf(q)>-1||String(s.amCode||'').toLowerCase().indexOf(q)>-1; });
+  if(!list.length){ document.getElementById('storeList').innerHTML='<div class="empty"><div class="empty-i">🏪</div><div class="empty-t">No stores</div><div class="empty-s">Import CSV to add</div></div>'; return; }
+  document.getElementById('storeList').innerHTML=list.slice(0,300).map(function(s){
+    return '<div class="lrow"><span class="lcode">'+s.storeCode+'</span><div class="linfo"><div class="lname">'+s.storeName+'</div><div class="lsub">'+(s.city?s.city+', ':'')+(s.state||'')+' · AM: '+s.amCode+(s.smName?' · SM: '+s.smName:'')+'</div></div><div class="lactions"><button class="btn btn-outline btn-xs" onclick="openStoreModal(\''+s.storeCode+'\')">Edit</button><button class="btn btn-red btn-xs" onclick="delStore(\''+s.storeCode+'\')">Del</button></div></div>';
+  }).join('')+(list.length>300?'<div class="lrow text3 small" style="justify-content:center">Showing first 300 of '+list.length+' · use search</div>':'');
+}
+function dlSampleCSV(){
+  downloadCSV([
+    ['StoreCode','StoreName','SMMail','AMMail','ZFMEmail','SMName','City','AMName','State','AMCode','ZFMCode','Latitude','Longitude'],
+    ['HH02','Sample Store','sm@vishalretail.co.in','am@vishalretail.co.in','zfm@vishalretail.co.in','Ramesh Kumar','Hisar','Ajay Singh','Haryana','6054605','ZFM01','29.1492','75.7217']
+  ],'VMM_StoreMaster_Sample.csv'); showToast('Sample CSV downloaded');
+}
+function importStores(input){
+  var f=input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    var wb=XLSX.read(e.target.result,{type:'binary'}),ws=wb.Sheets[wb.SheetNames[0]];
+    var raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    if(raw.length<2){ showToast('Empty file'); return; }
+    var hdr=raw[0],data=raw.slice(1).filter(function(x){return x[0]&&String(x[0]).trim();});
+    function gc(row,names,fb){ for(var n=0;n<names.length;n++){ var i=hdr.findIndex(function(h){return String(h).toLowerCase()===names[n];}); if(i>=0) return String(row[i]||'').trim(); } return String(row[fb]||'').trim(); }
+    gImportRows=data.map(function(x){return{
+      storeCode:gc(x,['storecode','store code','code'],0),storeName:gc(x,['storename','store name','name'],1),
+      smMail:gc(x,['smmail','sm mail'],2),amMail:gc(x,['ammail','am mail'],3),zfmEmail:gc(x,['zfmemail','zfm email'],4),
+      smName:gc(x,['smname','sm name'],5),city:gc(x,['city'],6),amName:gc(x,['amname','am name'],7),state:gc(x,['state'],8),
+      amCode:gc(x,['amcode','am code'],9),zfmCode:gc(x,['zfmcode','zfm code'],10),latitude:parseFloat(gc(x,['latitude','lat'],11))||0,longitude:parseFloat(gc(x,['longitude','lng','long'],12))||0
+    };}).filter(function(x){return x.storeCode;});
+    if(!gImportRows.length){ showToast('No valid rows'); return; }
+    var p=gImportRows.slice(0,5);
+    document.getElementById('importInfo').textContent=gImportRows.length+' rows';
+    document.getElementById('importTbl').innerHTML='<table class="tbl"><thead><tr><th>Code</th><th>Name</th><th>SM</th><th>AM Name</th><th>AM Code</th><th>City</th></tr></thead><tbody>'+p.map(function(x){return '<tr><td class="mono">'+x.storeCode+'</td><td>'+x.storeName+'</td><td>'+x.smName+'</td><td>'+x.amName+'</td><td class="mono">'+x.amCode+'</td><td>'+x.city+'</td></tr>';}).join('')+'</tbody></table>';
+    document.getElementById('importPrev').classList.remove('hidden');
+    input.value='';
+  };
+  r.readAsBinaryString(f);
+}
+function commitStores(){
+  if(!gImportRows.length) return;
+  showLoader('Importing '+gImportRows.length+' stores…');
+  var CH=499,batches=[];
+  for(var i=0;i<gImportRows.length;i+=CH) batches.push(gImportRows.slice(i,i+CH));
+  var chain=Promise.resolve();
+  batches.forEach(function(ch){ chain=chain.then(function(){ var b=db.batch(); ch.forEach(function(x){ b.set(db.collection('stores').doc(x.storeCode),{storeCode:x.storeCode,storeName:x.storeName,smMail:x.smMail,smName:x.smName,amMail:x.amMail,amName:x.amName,amCode:String(x.amCode),zfmEmail:x.zfmEmail,zfmCode:x.zfmCode,city:x.city,state:x.state,latitude:x.latitude,longitude:x.longitude,isActive:true}); }); return b.commit(); }); });
+  chain.then(function(){ hideLoader(); showToast(gImportRows.length+' imported ✓'); document.getElementById('importPrev').classList.add('hidden'); gImportRows=[]; loadStores(); }).catch(function(e){ hideLoader(); showToast(e.message); });
+}
+function openStoreModal(code){
+  gStoreEdit=code||null; document.getElementById('storeModalTitle').textContent=code?'Edit Store':'Add Store'; document.getElementById('mCode').disabled=!!code;
+  var M=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
+  if(code){
+    var d=gStores.find(function(s){return s.storeCode===code;})||{};
+    M('mCode',d.storeCode||code);M('mName',d.storeName);M('mSMName',d.smName);M('mSMMail',d.smMail);M('mAMName',d.amName);M('mAMMail',d.amMail);M('mAMCode',d.amCode);M('mZFMCode',d.zfmCode);M('mZFMEmail',d.zfmEmail);M('mCity',d.city);M('mState',d.state);M('mLat',d.latitude||'');M('mLng',d.longitude||'');
+    document.getElementById('mActive').checked=d.isActive!==false;
+  } else { ['mCode','mName','mSMName','mSMMail','mAMName','mAMMail','mAMCode','mZFMCode','mZFMEmail','mCity','mState','mLat','mLng'].forEach(function(id){M(id,'');}); document.getElementById('mActive').checked=true; }
+  showOv('ovStore');
+}
+function saveStore(){
+  var code=(document.getElementById('mCode').value||'').trim(); if(!code){ showToast('Code required'); return; }
+  db.collection('stores').doc(code).set({storeCode:code,storeName:document.getElementById('mName').value.trim(),smName:document.getElementById('mSMName').value.trim(),smMail:document.getElementById('mSMMail').value.trim(),amName:document.getElementById('mAMName').value.trim(),amMail:document.getElementById('mAMMail').value.trim(),amCode:document.getElementById('mAMCode').value.trim(),zfmCode:document.getElementById('mZFMCode').value.trim(),zfmEmail:document.getElementById('mZFMEmail').value.trim(),city:document.getElementById('mCity').value.trim(),state:document.getElementById('mState').value.trim(),latitude:parseFloat(document.getElementById('mLat').value)||0,longitude:parseFloat(document.getElementById('mLng').value)||0,isActive:document.getElementById('mActive').checked}).then(function(){ closeOv('ovStore'); loadStores(); showToast('Saved ✓'); });
+}
+function delStore(code){ if(!confirm('Delete '+code+'?')) return; db.collection('stores').doc(code).delete().then(function(){ loadStores(); showToast('Deleted'); }); }
+
+// ════ AM COVERAGE (read-only — pairing is automatic by AM E-Code) ════
+function openAssignTool(){
+  showLoader('Analyzing…');
+  db.collection('stores').get().then(function(snap){
+    hideLoader();
+    var stores=[]; snap.forEach(function(d){ stores.push(d.data()); });
+    var amMap={},noCode=0;
+    stores.forEach(function(s){ var c=String(s.amCode||'').trim(); if(!c||c==='#N/A'){ noCode++; return; } if(!amMap[c])amMap[c]={count:0,sample:s.amName||''}; amMap[c].count++; });
+    var codes=Object.keys(amMap).sort();
+    var h='<div class="info-box">Pairing is <strong>automatic</strong>: when an AM logs in with their E-Code, they see every store whose <strong>AM Code</strong> matches. No manual assignment needed — just keep the store master\'s AM Code accurate.</div>';
+    if(noCode) h+='<div class="warn-box">⚠️ '+noCode+' store(s) have a missing / #N/A AM Code — those AMs won\'t see them until you fix the code on the Stores page.</div>';
+    h+='<table class="tbl"><thead><tr><th>AM E-Code</th><th>AM Name (from store master)</th><th>Stores Covered</th></tr></thead><tbody>';
+    codes.forEach(function(c){ h+='<tr><td class="mono" style="font-weight:700">'+c+'</td><td>'+(amMap[c].sample||'—')+'</td><td style="text-align:center"><span class="badge badge-blue">'+amMap[c].count+'</span></td></tr>'; });
+    h+='</tbody></table>';
+    h+='<div class="success-box mt-3">✓ '+codes.length+' AM E-Codes covering '+(stores.length-noCode)+' stores</div>';
+    document.getElementById('assignBody').innerHTML=h;
+    showOv('ovAssign');
+  }).catch(function(e){ hideLoader(); showToast(e.message); });
+}
+
+// ════════════════════ QUESTIONS ════════════════════
+function loadQuestions(){
+  db.collection('questions').orderBy('sortOrder').get().then(function(snap){
+    gAllQuestions=[]; snap.forEach(function(d){ gAllQuestions.push(Object.assign({id:d.id},d.data())); });
+    renderQuestions();
+  });
+}
+function switchQType(t){
+  gCurrentQType=t;
+  document.getElementById('qTabAM').classList.toggle('active',t==='AM');
+  document.getElementById('qTabSTORE').classList.toggle('active',t==='STORE');
+  document.getElementById('qTypeLbl').textContent='Showing: '+(t==='AM'?'AM Review':'Store Checklist');
+  renderQuestions();
+}
+function renderQuestions(){
+  var qs=gAllQuestions.filter(function(q){return (q.reviewType||'AM')===gCurrentQType;}).sort(function(a,b){return (a.sortOrder||0)-(b.sortOrder||0);});
+  if(!qs.length){ document.getElementById('qList').innerHTML='<div class="empty"><div class="empty-i">❓</div><div class="empty-t">No '+gCurrentQType+' questions</div><div class="empty-s">Add or bulk-upload questions</div></div>'; return; }
+  document.getElementById('qList').innerHTML=qs.map(function(q){
+    return '<div class="lrow"><div class="lav" style="background:var(--blue);width:28px;height:28px;font-size:11px">'+q.sortOrder+'</div><div class="linfo"><div class="lname">'+q.sectionTitle+'</div><div class="lsub">'+(q.requiresFurtherDetails?'FD · ':'')+(q.requiresPhoto?'Photo · ':'')+(q.isActive?'Active':'Inactive')+'</div></div><div class="lactions"><button class="btn btn-outline btn-xs" onclick="openQModal(\''+q.id+'\')">Edit</button><button class="btn btn-amber btn-xs" onclick="toggleQ(\''+q.id+'\','+!q.isActive+')">'+(q.isActive?'Off':'On')+'</button><button class="btn btn-red btn-xs" onclick="delQ(\''+q.id+'\')">Del</button></div></div>';
+  }).join('');
+}
+function dlQSampleCSV(){ downloadCSV([['ReviewType','SortOrder','SectionTitle','SubPoints','RequiresFurtherDetails','RequiresPhoto'],['AM','1','Cash Deposit / S&E','Cash counted, slip collected','No','No'],['STORE','1','Cleanliness','Floor and washroom clean','No','Yes']],'VMM_Questions_Sample.csv'); showToast('Sample downloaded'); }
+function importQuestions(input){
+  var f=input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    var wb=XLSX.read(e.target.result,{type:'binary'}),ws=wb.Sheets[wb.SheetNames[0]],raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    if(raw.length<2){ showToast('Empty file'); return; }
+    var hdr=raw[0],data=raw.slice(1).filter(function(x){return x[2]&&String(x[2]).trim();});
+    function gc(row,names,fb){ for(var n=0;n<names.length;n++){ var i=hdr.findIndex(function(h){return String(h).toLowerCase()===names[n];}); if(i>=0) return String(row[i]||'').trim(); } return String(row[fb]||'').trim(); }
+    function yes(v){ return /^(yes|true|1|y)$/i.test(String(v).trim()); }
+    gQImportRows=data.map(function(x){return{
+      reviewType:(gc(x,['reviewtype','review type','type'],0)||'AM').toUpperCase()==='STORE'?'STORE':'AM',
+      sortOrder:parseInt(gc(x,['sortorder','sort order','order'],1))||1,
+      sectionTitle:gc(x,['sectiontitle','section title','title'],2),
+      subPoints:gc(x,['subpoints','sub points'],3),
+      requiresFurtherDetails:yes(gc(x,['requiresfurtherdetails','further details','fd'],4)),
+      requiresPhoto:yes(gc(x,['requiresphoto','photo'],5)),isActive:true
+    };}).filter(function(x){return x.sectionTitle;});
+    if(!gQImportRows.length){ showToast('No valid rows'); return; }
+    document.getElementById('qImportInfo').textContent=gQImportRows.length+' rows';
+    document.getElementById('qImportTbl').innerHTML='<table class="tbl"><thead><tr><th>Type</th><th>Order</th><th>Section</th><th>FD</th><th>Photo</th></tr></thead><tbody>'+gQImportRows.slice(0,8).map(function(x){return '<tr><td><span class="badge '+(x.reviewType==='AM'?'badge-blue':'badge-pink')+'">'+x.reviewType+'</span></td><td>'+x.sortOrder+'</td><td>'+x.sectionTitle+'</td><td>'+(x.requiresFurtherDetails?'✓':'')+'</td><td>'+(x.requiresPhoto?'✓':'')+'</td></tr>';}).join('')+'</tbody></table>';
+    document.getElementById('qImportPrev').classList.remove('hidden');
+    input.value='';
+  };
+  r.readAsBinaryString(f);
+}
+function commitQuestions(){
+  if(!gQImportRows.length) return;
+  showLoader('Importing questions…');
+  var b=db.batch(); gQImportRows.forEach(function(x){ b.set(db.collection('questions').doc(),x); });
+  b.commit().then(function(){ hideLoader(); showToast(gQImportRows.length+' questions added ✓'); document.getElementById('qImportPrev').classList.add('hidden'); gQImportRows=[]; loadQuestions(); }).catch(function(e){ hideLoader(); showToast(e.message); });
+}
+function openQModal(id){
+  gQEdit=id; document.getElementById('qModalTitle').textContent=id?'Edit Question':'Add Question';
+  if(id){ var q=gAllQuestions.find(function(x){return x.id===id;})||{};
+    document.getElementById('mQType').value=q.reviewType||'AM';document.getElementById('mQOrd').value=q.sortOrder||1;document.getElementById('mQTtl').value=q.sectionTitle||'';document.getElementById('mQSub').value=q.subPoints||'';document.getElementById('mQFD').checked=!!q.requiresFurtherDetails;document.getElementById('mQPhoto').checked=!!q.requiresPhoto;
+  } else { document.getElementById('mQType').value=gCurrentQType;document.getElementById('mQOrd').value=1;document.getElementById('mQTtl').value='';document.getElementById('mQSub').value='';document.getElementById('mQFD').checked=false;document.getElementById('mQPhoto').checked=false; }
+  showOv('ovQ');
+}
+function saveQ(){
+  var t=document.getElementById('mQTtl').value.trim(); if(!t){ showToast('Title required'); return; }
+  var d={reviewType:document.getElementById('mQType').value,sortOrder:parseInt(document.getElementById('mQOrd').value)||1,sectionTitle:t,subPoints:document.getElementById('mQSub').value.trim(),requiresFurtherDetails:document.getElementById('mQFD').checked,requiresPhoto:document.getElementById('mQPhoto').checked,isActive:true};
+  var ref=gQEdit?db.collection('questions').doc(gQEdit):db.collection('questions').doc();
+  ref.set(d,{merge:true}).then(function(){ closeOv('ovQ'); loadQuestions(); showToast('Saved ✓'); });
+}
+function toggleQ(id,a){ db.collection('questions').doc(id).update({isActive:a}).then(function(){ loadQuestions(); }); }
+function delQ(id){ if(!confirm('Delete?')) return; db.collection('questions').doc(id).delete().then(function(){ loadQuestions(); showToast('Deleted'); }); }
+
+// ════════════════════ USER VIEW PREVIEW ════════════════════
+function loadPreview(){
+  db.collection('stores').where('isActive','==',true).orderBy('storeCode').limit(50).get().then(function(snap){
+    var opts='<option value="">— select store —</option>';
+    snap.forEach(function(d){ var s=d.data(); opts+='<option value="'+s.storeCode+'">'+s.storeCode+' · '+s.storeName+'</option>'; });
+    document.getElementById('pvStore').innerHTML=opts;
+  });
+  if(!gAllQuestions.length){ db.collection('questions').orderBy('sortOrder').get().then(function(snap){ gAllQuestions=[]; snap.forEach(function(d){ gAllQuestions.push(Object.assign({id:d.id},d.data())); }); renderPreview(); }); }
+  else renderPreview();
+}
+function renderPreview(){
+  var role=document.getElementById('pvRole').value;
+  var code=document.getElementById('pvStore').value;
+  var st=gStores.find(function(s){return s.storeCode===code;})||null;
+  var qs=gAllQuestions.filter(function(q){return (q.reviewType||'AM')===role&&q.isActive!==false;}).sort(function(a,b){return (a.sortOrder||0)-(b.sortOrder||0);});
+  var title=role==='AM'?'Daily Discipline Review':'Store Daily Checklist';
+  var tag=role==='AM'?"Today's store reviews":'To be filled daily';
+  var strip=st?(st.storeCode+' · '+st.storeName):'VMM Sample Store (XXX001)';
+  var h='<div style="background:var(--blue-d);padding:11px 14px;color:#fff;font-size:14px;font-weight:900">VISHAL <span style="color:var(--pink-l)">MEGA MART</span></div>';
+  h+='<div style="background:var(--blue);padding:7px 14px"><div style="color:#fff;font-size:12px;font-weight:700">'+title+'</div><div style="color:rgba(255,255,255,.6);font-size:10px;margin-top:1px">'+tag+'</div></div>';
+  h+='<div style="background:var(--pink);padding:9px 14px;display:flex;gap:8px;color:#fff;font-size:12px;font-weight:700;align-items:center"><span>📍</span>'+strip+'</div>';
+  h+='<div style="padding:9px;display:flex;flex-direction:column;gap:9px">';
+  if(!qs.length) h+='<div class="empty"><div class="empty-i">❓</div><div class="empty-t">No '+role+' questions</div></div>';
+  qs.forEach(function(q,i){
+    h+='<div class="q-card"><div class="q-card-head"><div class="q-no">'+(i+1)+'</div><div class="q-q"><div class="q-q-title">'+q.sectionTitle+'</div>'+(q.subPoints?'<div class="q-q-sub">'+q.subPoints.split(',').map(function(s){return s.trim();}).filter(Boolean).join(' · ')+'</div>':'')+'</div>'+(q.requiresPhoto?'<span class="badge badge-pink">📷</span>':'')+'</div>'+
+      '<div class="ans-row"><button class="ans-btn yes">✓ '+(role==='AM'?'Comp':'Yes')+'</button><button class="ans-btn no">✗ '+(role==='AM'?'NC':'No')+'</button><button class="ans-btn na">N/A</button></div></div>';
+  });
+  h+='</div><div style="padding:10px 9px;background:#fff;border-top:1px solid #eee"><div style="background:var(--pink);color:#fff;text-align:center;padding:12px;border-radius:10px;font-size:13px;font-weight:700">✓ Submit '+title+'</div></div>';
+  document.getElementById('pvScreen').innerHTML=h;
+  // store info panel
+  if(st){
+    document.getElementById('pvInfo').innerHTML='<div style="font-size:13px;line-height:2">'+
+      '<div><strong>Code:</strong> <span class="mono">'+st.storeCode+'</span></div>'+
+      '<div><strong>Name:</strong> '+st.storeName+'</div>'+
+      '<div><strong>City:</strong> '+(st.city||'—')+', '+(st.state||'')+'</div>'+
+      '<div><strong>SM:</strong> '+(st.smName||'—')+'</div>'+
+      '<div><strong>AM:</strong> '+(st.amName||'—')+' ('+(st.amCode||'—')+')</div>'+
+      '<div><strong>ZFM:</strong> '+(st.zfmCode||'—')+'</div>'+
+      '<div><strong>GPS:</strong> '+(st.latitude?st.latitude+', '+st.longitude:'Not set')+'</div></div>';
+  } else document.getElementById('pvInfo').innerHTML='<div class="text3 small">Select a store to view details</div>';
+}
+
+// ════════════════════ EMAIL PUSH ════════════════════
+var gEmailHTML='', gInteractiveHTML='', gEmailMeta={date:'',subject:''};
+function recolor(p){ return p>=80?'#2E7D32':p>=60?'#E65100':'#C62828'; }
+function buildEmailPreview(){
+  var date=document.getElementById('epDate').value||toDateStr(addDays(new Date(),-1));
+  var type=document.getElementById('epType').value;
+  showLoader('Building report…');
+  Promise.all([
+    db.collection('stores').where('isActive','==',true).get(),
+    db.collection('submissions').where('reviewDate','==',date).get() // date only → no composite index
+  ]).then(function(res){
+    hideLoader();
+    var stores=[]; res[0].forEach(function(d){ stores.push(d.data()); });
+    var allSubs=[]; res[1].forEach(function(d){ allSubs.push(d.data()); });
+    var subs=allSubs.filter(function(s){return s.reviewType===type;});
+    var totalStores=stores.length;
+    var amSet={}; stores.forEach(function(s){ var c=String(s.amCode||'').trim(); if(c&&c!=='#N/A') amSet[c]=true; });
+    var totalAMs=Object.keys(amSet).length;
+    var filled=subs.filter(function(s){return !s.isSkipped;});
+    var skipped=subs.filter(function(s){return s.isSkipped;}).length;
+    var seen={}; subs.forEach(function(s){seen[s.storeCode]=true;});
+    var submitted=Object.keys(seen).length, pending=Math.max(0,totalStores-submitted);
+    var fill=totalStores?Math.round(submitted/totalStores*100):0;
+    var comps=filled.map(function(s){return s.overallCompliance||0;});
+    var avg=comps.length?Math.round(comps.reduce(function(a,b){return a+b;},0)/comps.length):0;
+    var typeLbl=(type==='AM'?'AM Daily Discipline Review':'Store Checklist');
+
+    // coverage (combines both types)
+    var cov=computeCoverage(stores,allSubs);
+
+    // ── statcard row ──
+    function sc(v,l,c,bg){ return '<td style="padding:12px;text-align:center;background:'+bg+';border:1px solid #fff"><div style="font-size:22px;font-weight:900;color:'+c+'">'+v+'</div><div style="font-size:11px;color:#616161">'+l+'</div></td>'; }
+    var statRow='<table style="width:100%;border-collapse:collapse;margin:0"><tr>'+
+      sc(totalStores,'Stores','#1565C0','#E3F2FD')+sc(totalAMs,'AMs','#7B1FA2','#F3E5F5')+
+      sc(submitted,'Submitted','#2E7D32','#E8F5E9')+sc(pending,'Pending','#C62828','#FFEBEE')+
+      sc(fill+'%','Fill','#E65100','#FFF3E0')+sc(avg+'%','Compliance','#1565C0','#E3F2FD')+'</tr></table>';
+
+    // ── coverage table ──
+    var covRows=cov.map(function(a){
+      return '<tr><td style="padding:5px 8px;border:1px solid #ddd">'+a.zfm+'</td><td style="padding:5px 8px;border:1px solid #ddd">'+a.rgn+'</td><td style="padding:5px 8px;border:1px solid #ddd">'+(a.amName||'-')+'</td><td style="padding:5px 8px;border:1px solid #ddd;font-family:monospace">'+a.code+'</td><td style="padding:5px 8px;border:1px solid #ddd;text-align:center">'+a.total+'</td><td style="padding:5px 8px;border:1px solid #ddd;text-align:center">'+a.amField+'</td><td style="padding:5px 8px;border:1px solid #ddd;text-align:center">'+a.storeFilled+'</td><td style="padding:5px 8px;border:1px solid #ddd;text-align:center;font-weight:bold;color:'+recolor(a.fillpct)+'">'+a.fillpct+'%</td><td style="padding:5px 8px;border:1px solid #ddd;text-align:center;font-weight:bold;color:'+(a.comps?recolor(a.comp):'#999')+'">'+(a.comps?a.comp+'%':'-')+'</td></tr>';
+    }).join('');
+    var covTable='<div style="padding:8px 20px"><div style="font-weight:bold;margin:6px 0;color:#212121">ZFM / AM Coverage</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#0D47A1;color:#fff">'+
+      ['ZFM','RGN','AM Name','E-Code','#Store','AM Field','Rest St Filled','Fill%','Comp%'].map(function(h){return '<th style="padding:6px 8px;border:1px solid #1565C0;text-align:left">'+h+'</th>';}).join('')+
+      '</tr></thead><tbody>'+(covRows||'<tr><td colspan="9" style="padding:12px;text-align:center;color:#999">No data</td></tr>')+'</tbody></table></div>';
+
+    // ── store-wise ──
+    var sorted=filled.slice().sort(function(a,b){return (a.overallCompliance||0)-(b.overallCompliance||0);});
+    var rows=sorted.map(function(s){
+      var p=s.overallCompliance||0;
+      var nd=(s.answers||[]).filter(function(a){return a.status==='nc';}).map(function(a){return a.sectionTitle;}).join(', ');
+      return '<tr><td style="padding:6px 10px;border:1px solid #ddd;font-family:monospace">'+s.storeCode+'</td><td style="padding:6px 10px;border:1px solid #ddd">'+s.storeName+'</td><td style="padding:6px 10px;border:1px solid #ddd">'+s.amCode+'</td><td style="padding:6px 10px;border:1px solid #ddd;color:'+recolor(p)+';font-weight:bold;text-align:center">'+p+'%</td><td style="padding:6px 10px;border:1px solid #ddd;color:#C62828;font-size:12px">'+nd+'</td></tr>';
+    }).join('');
+    var storeTable='<div style="padding:8px 20px"><div style="font-weight:bold;margin:6px 0;color:#212121">Store-wise Compliance ('+filled.length+' reviews &middot; '+skipped+' skipped)</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#F8F9FA"><th style="padding:6px 10px;border:1px solid #ddd;text-align:left">Code</th><th style="padding:6px 10px;border:1px solid #ddd;text-align:left">Store</th><th style="padding:6px 10px;border:1px solid #ddd;text-align:left">AM</th><th style="padding:6px 10px;border:1px solid #ddd">Comp%</th><th style="padding:6px 10px;border:1px solid #ddd;text-align:left">Not Done Sections</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" style="padding:14px;text-align:center;color:#999">No submissions</td></tr>')+'</tbody></table></div>';
+
+    gEmailHTML='<div style="font-family:Arial,sans-serif;max-width:760px;border:1px solid #e0e0e0">'+
+      '<div style="background:#0D47A1;color:#fff;padding:16px 20px"><div style="font-size:18px;font-weight:900">VISHAL <span style="color:#F06292">MEGA MART</span></div><div style="font-size:13px;margin-top:2px">'+typeLbl+' &middot; '+date+'</div></div>'+
+      statRow+covTable+storeTable+
+      '<div style="padding:10px 20px;background:#F5F5F5;font-size:11px;color:#999">Interactive dashboard attached. Generated by Daily Discipline Review &middot; VMM Central Operations &amp; BI</div></div>';
+    document.getElementById('epPreview').innerHTML=gEmailHTML;
+
+    // ── self-contained interactive attachment ──
+    gInteractiveHTML=buildInteractiveDashboard(typeLbl,date,{totalStores:totalStores,totalAMs:totalAMs,submitted:submitted,pending:pending,fill:fill,avg:avg},cov,sorted);
+    gEmailMeta={date:date,subject:(document.getElementById('epSubject').value||'Daily Discipline Review Dashboard')};
+    showToast('Report built \u2713');
+  }).catch(function(e){ hideLoader(); showToast(e.message); });
+}
+
+// shared coverage compute (used by dashboard + email)
+function computeCoverage(stores,allSubs){
+  var sub={};
+  allSubs.forEach(function(s){ if(s.isSkipped) return; var k=s.storeCode; if(!sub[k]) sub[k]={am:false,store:false,comps:[]}; if(s.reviewType==='AM') sub[k].am=true; else if(s.reviewType==='STORE') sub[k].store=true; if(typeof s.overallCompliance==='number') sub[k].comps.push(s.overallCompliance); });
+  var am={};
+  stores.forEach(function(st){
+    var ac=String(st.amCode||'').trim()||'#N/A';
+    if(!am[ac]) am[ac]={zfm:String(st.zfmCode||'')||'—',rgn:st.state||st.city||'—',amName:st.amName||'',code:ac,total:0,amField:0,storeFilled:0,filledSet:{},compArr:[]};
+    var a=am[ac]; a.total++; if(!a.amName&&st.amName)a.amName=st.amName;
+    var s=sub[st.storeCode];
+    if(s){ if(s.am)a.amField++; if(s.store)a.storeFilled++; if(s.am||s.store)a.filledSet[st.storeCode]=true; a.compArr=a.compArr.concat(s.comps); }
+  });
+  var rows=Object.keys(am).map(function(k){var a=am[k]; var f=Object.keys(a.filledSet).length; a.filled=f; a.fillpct=a.total?Math.round(f/a.total*100):0; a.comps=a.compArr.length; a.comp=a.compArr.length?Math.round(a.compArr.reduce(function(x,y){return x+y;},0)/a.compArr.length):0; return a;});
+  rows.sort(function(a,b){ return (a.zfm+a.amName).localeCompare(b.zfm+b.amName); });
+  return rows;
+}
+
+// build a standalone interactive .html (Chart.js + filters) as the email attachment
+function buildInteractiveDashboard(title,date,stats,cov,stores){
+  var data={title:title,date:date,stats:stats,cov:cov.map(function(a){return {zfm:a.zfm,rgn:a.rgn,amName:a.amName,code:a.code,total:a.total,amField:a.amField,storeFilled:a.storeFilled,fillpct:a.fillpct,comp:a.comp,comps:a.comps};}),stores:stores.map(function(s){return {code:s.storeCode,name:s.storeName,am:s.amCode,comp:s.overallCompliance||0,nd:(s.answers||[]).filter(function(a){return a.status==='nc';}).map(function(a){return a.sectionTitle;})};})};
+  var json=JSON.stringify(data).replace(/<\//g,'<\\/');
+  return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
+    '<title>'+title+' '+date+'</title>'+
+    '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>'+
+    '<style>body{font-family:Arial,sans-serif;margin:0;background:#f4f6f9;color:#212121}.hd{background:#0D47A1;color:#fff;padding:16px 20px}.hd b{font-size:18px}.hd .p{color:#F06292}.wrap{padding:16px}.cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}.c{flex:1;min-width:120px;background:#fff;border-radius:8px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.1)}.c .v{font-size:24px;font-weight:900}.c .l{font-size:11px;color:#666}.card{background:#fff;border-radius:8px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.1)}h3{margin:0 0 10px;font-size:14px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:6px 8px;border:1px solid #e0e0e0;text-align:left}th{background:#f8f9fa}input{padding:6px 10px;border:1px solid #ccc;border-radius:6px;width:100%;max-width:280px;margin-bottom:10px}</style></head><body>'+
+    '<div class="hd"><b>VISHAL <span class="p">MEGA MART</span></b><div>'+title+' &middot; '+date+'</div></div>'+
+    '<div class="wrap"><div class="cards" id="cards"></div>'+
+    '<div class="card"><h3>AM Fill % (lowest first)</h3><canvas id="ch" height="120"></canvas></div>'+
+    '<div class="card"><h3>ZFM / AM Coverage</h3><input id="q" placeholder="Filter AM / ZFM…" oninput="ft()"><div style="overflow:auto"><table id="covt"><thead><tr><th>ZFM</th><th>RGN</th><th>AM</th><th>E-Code</th><th>#Store</th><th>AM Field</th><th>Rest Filled</th><th>Fill%</th><th>Comp%</th></tr></thead><tbody></tbody></table></div></div>'+
+    '<div class="card"><h3>Store-wise Compliance</h3><div style="overflow:auto"><table id="stt"><thead><tr><th>Code</th><th>Store</th><th>AM</th><th>Comp%</th><th>Not Done</th></tr></thead><tbody></tbody></table></div></div>'+
+    '</div><script>var D='+json+';'+
+    'function col(p){return p>=80?"#2E7D32":p>=60?"#E65100":"#C62828";}'+
+    'var s=D.stats;document.getElementById("cards").innerHTML=[["Stores",s.totalStores,"#1565C0"],["AMs",s.totalAMs,"#7B1FA2"],["Submitted",s.submitted,"#2E7D32"],["Pending",s.pending,"#C62828"],["Fill%",s.fill+"%","#E65100"],["Compliance%",s.avg+"%","#1565C0"]].map(function(c){return \'<div class="c"><div class="v" style="color:\'+c[2]+\'">\'+c[1]+\'</div><div class="l">\'+c[0]+\'</div></div>\';}).join("");'+
+    'function rowsCov(list){return list.map(function(a){return "<tr><td>"+a.zfm+"</td><td>"+a.rgn+"</td><td>"+(a.amName||"-")+"</td><td>"+a.code+"</td><td>"+a.total+"</td><td>"+a.amField+"</td><td>"+a.storeFilled+"</td><td style=\\"font-weight:bold;color:"+col(a.fillpct)+"\\">"+a.fillpct+"%</td><td style=\\"font-weight:bold;color:"+(a.comps?col(a.comp):"#999")+"\\">"+(a.comps?a.comp+"%":"-")+"</td></tr>";}).join("");}'+
+    'document.querySelector("#covt tbody").innerHTML=rowsCov(D.cov);'+
+    'document.querySelector("#stt tbody").innerHTML=D.stores.map(function(s){return "<tr><td>"+s.code+"</td><td>"+s.name+"</td><td>"+s.am+"</td><td style=\\"font-weight:bold;color:"+col(s.comp)+"\\">"+s.comp+"%</td><td style=\\"color:#C62828\\">"+s.nd.join(", ")+"</td></tr>";}).join("")||"<tr><td colspan=5 style=text-align:center;color:#999>No submissions</td></tr>";'+
+    'function ft(){var q=document.getElementById("q").value.toLowerCase();document.querySelector("#covt tbody").innerHTML=rowsCov(D.cov.filter(function(a){return (a.amName+" "+a.zfm+" "+a.code).toLowerCase().indexOf(q)>-1;}));}'+
+    'var cd=D.cov.slice().sort(function(a,b){return a.fillpct-b.fillpct;}).slice(0,20);'+
+    'new Chart(document.getElementById("ch"),{type:"bar",data:{labels:cd.map(function(a){return a.amName||a.code;}),datasets:[{label:"Fill%",data:cd.map(function(a){return a.fillpct;}),backgroundColor:cd.map(function(a){return col(a.fillpct);})}]},options:{plugins:{legend:{display:false}},scales:{y:{max:100}}}});'+
+    '<\/script></body></html>';
+}
+
+// ── .eml builder: HTML body + interactive attachment, opens in Outlook as a ready draft ──
+function b64utf8(str){ return btoa(unescape(encodeURIComponent(str))); }
+function chunk76(s){ return s.replace(/.{1,76}/g,'$&\r\n'); }
+function genEml(to,cc){
+  if(!gEmailHTML){ buildEmailPreview(); showToast('Building report \u2014 click Send again'); return; }
+  var date=gEmailMeta.date, subj=(gEmailMeta.subject||'Daily Discipline Review Dashboard')+' | '+date;
+  var bd='----=_VMM_'+Date.now();
+  var attname='Dashboard_'+date+'.html';
+  var eml=[];
+  eml.push('From: '+DEFAULT_FROM);
+  eml.push('To: '+to);
+  if(cc) eml.push('Cc: '+cc);
+  eml.push('Subject: '+subj);
+  eml.push('X-Unsent: 1');                 // tells Outlook to open as a composable draft
+  eml.push('MIME-Version: 1.0');
+  eml.push('Content-Type: multipart/mixed; boundary="'+bd+'"');
+  eml.push('');
+  eml.push('--'+bd);
+  eml.push('Content-Type: text/html; charset="utf-8"');
+  eml.push('Content-Transfer-Encoding: base64');
+  eml.push('');
+  eml.push(chunk76(b64utf8(gEmailHTML)));
+  eml.push('--'+bd);
+  eml.push('Content-Type: text/html; charset="utf-8"; name="'+attname+'"');
+  eml.push('Content-Transfer-Encoding: base64');
+  eml.push('Content-Disposition: attachment; filename="'+attname+'"');
+  eml.push('');
+  eml.push(chunk76(b64utf8(gInteractiveHTML)));
+  eml.push('--'+bd+'--');
+  var blob=new Blob([eml.join('\r\n')],{type:'message/rfc822'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download='DailyDisciplineReview_'+date+'.eml';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+  showToast('Opening Outlook draft (HTML body + attachment) \u2713');
+}
+function sendViaOutlook(){
+  var to=(document.getElementById('epTo').value||'').trim();
+  var cc=(document.getElementById('epCc').value||'').trim();
+  if(!to){ showToast('Enter at least one To recipient'); return; }
+  genEml(to,cc);
+}
+function sendTestEmail(){ genEml(DEFAULT_FROM,''); }
+
+// ════════════════════ SETTINGS ════════════════════
+function loadSettings(){
+  document.getElementById('cfgTestMode').checked=gConfig.testMode;
+  document.getElementById('cfgTestMail').value=gConfig.testMail||DEFAULT_FROM;
+  document.getElementById('cfgRadius').value=gConfig.gpsRadius||100;
+}
+function saveTestMode(){
+  gConfig.testMode=document.getElementById('cfgTestMode').checked;
+  gConfig.testMail=document.getElementById('cfgTestMail').value.trim();
+  db.collection('config').doc('app').set({testMode:gConfig.testMode,testMail:gConfig.testMail,gpsRadius:gConfig.gpsRadius},{merge:true}).then(function(){ showToast('Test settings saved'+(gConfig.testMode?' \u00b7 TEST MODE ON':'')); });
+}
+function saveRadius(){
+  gConfig.gpsRadius=parseInt(document.getElementById('cfgRadius').value)||100;
+  db.collection('config').doc('app').set({gpsRadius:gConfig.gpsRadius},{merge:true}).then(function(){ showToast('Radius saved: '+gConfig.gpsRadius+'m'); });
+}
+
+// ════════════════════ OVERLAY + UTILS ════════════════════
+function showOv(id){ document.getElementById(id).classList.add('show'); }
+function closeOv(id){ document.getElementById(id).classList.remove('show'); }
+
+function toDateStr(d){ var m=(d.getMonth()+1),day=d.getDate(); return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(day<10?'0':'')+day; }
+function addDays(d,n){ var x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function haversine(la1,lo1,la2,lo2){ var R=6371000,t=Math.PI/180,dla=(la2-la1)*t,dlo=(lo2-lo1)*t,a=Math.sin(dla/2)*Math.sin(dla/2)+Math.cos(la1*t)*Math.cos(la2*t)*Math.sin(dlo/2)*Math.sin(dlo/2); return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))); }
+function fmtDist(m){ if(m==null) return '—'; return m<1000?m+' m':(m/1000).toFixed(1)+' km'; }
+function showToast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(window._tt); window._tt=setTimeout(function(){ t.style.display='none'; },2600); }
+function showLoader(msg){ document.getElementById('ld-msg').textContent=msg||'Loading…'; document.getElementById('loader').style.display='flex'; }
+function hideLoader(){ document.getElementById('loader').style.display='none'; }
+function downloadCSV(rows,filename){
+  var csv=rows.map(function(r){ return r.map(function(c){ c=String(c==null?'':c); return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c; }).join(','); }).join('\r\n');
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u);
+}
+</script>
+</body>
+</html>
