@@ -328,7 +328,54 @@ select.form-control{cursor:pointer}
       <input type="checkbox" id="amNewSiteChk" style="width:16px;height:16px"> <strong style="color:var(--amber)">New Site Visit</strong> (bypass GPS, selfie required)
     </label>
     <button class="btn btn-pink btn-lg btn-full" onclick="doLogin()">Continue →</button>
-    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:18px">v22.0 · Designed & Developed by Shubhendu Sinha · VMM Central Ops & BI</div>
+    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:18px">v22.1 · Designed & Developed by Shubhendu Sinha · VMM Central Ops & BI</div>
+    <div style="text-align:center;font-size:11px;margin-top:8px"><a href="javascript:void(0)" onclick="openPolicy()">Privacy Policy &amp; Data Notice</a></div>
+  </div>
+</div>
+
+<!-- ═══ CONSENT GATE (shown once before first GPS/Camera use on a device) ═══ -->
+<div class="overlay" id="ovConsent" style="z-index:950">
+  <div class="modal modal-lg">
+    <div class="modal-head"><span class="modal-title">📍🤳 Location &amp; Camera Notice</span></div>
+    <div class="modal-body">
+      <p class="small text2" style="margin-bottom:10px">Before you continue, please read how this app uses your data.</p>
+      <div class="info-box" style="margin-bottom:10px">
+        This app (<strong>Daily Discipline Review – VMM Central Operations</strong>) captures your <strong>GPS location</strong> and a <strong>geo-tagged photo/selfie</strong> at the time of login/submission, solely to verify that store/store-visit reviews are completed from the correct location by the correct person.
+      </div>
+      <ul class="small text2" style="margin:0 0 10px 18px;line-height:1.7">
+        <li><strong>What's collected:</strong> GPS coordinates, photo/selfie, timestamp, your E-Code/Store Code.</li>
+        <li><strong>Why:</strong> Operational compliance &amp; anti-fraud verification for VMM store reviews.</li>
+        <li><strong>Who can access it:</strong> Authorised VMM Central Operations admins only.</li>
+        <li><strong>Retention:</strong> Photos are purged on a rolling basis (admin-triggered, typically D-2 and older); text/audit records are retained for compliance reporting.</li>
+        <li><strong>Your rights:</strong> You may request access to, or deletion of, your data by contacting Central Operations (see Privacy Policy).</li>
+      </ul>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2);cursor:pointer">
+        <input type="checkbox" id="consentChk" style="width:16px;height:16px;margin-top:2px" onchange="document.getElementById('consentBtn').disabled=!this.checked">
+        <span>I have read the <a href="javascript:void(0)" onclick="openPolicy()">Privacy Policy</a> and I consent to the collection of my location and photo for this purpose.</span>
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-pink btn-full" id="consentBtn" disabled onclick="acceptConsent()">Agree &amp; Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRIVACY POLICY (read-only, reachable any time) ═══ -->
+<div class="overlay" id="ovPolicy" style="z-index:960">
+  <div class="modal modal-lg">
+    <div class="modal-head"><span class="modal-title">Privacy Policy &amp; Data Notice</span><button class="modal-x" onclick="closeOv('ovPolicy')">×</button></div>
+    <div class="modal-body small text2" style="line-height:1.7">
+      <p><strong>App:</strong> Daily Discipline Review – VMM Central Operations &amp; Business Intelligence</p>
+      <p class="mt-2"><strong>1. Data we collect</strong><br>GPS coordinates, a photo/selfie captured at login or store-visit submission, device timestamp, your E-Code/Store Code, and submission responses (questions, remarks, attachments).</p>
+      <p class="mt-2"><strong>2. Why we collect it</strong><br>To verify that the Area Manager / Store representative submitting the Daily Discipline Review is physically present at the correct location, and to prevent fraudulent or remote submissions. This is an internal operational compliance control.</p>
+      <p class="mt-2"><strong>3. Sensitive data notice</strong><br>Your photo/selfie may be treated as sensitive personal data (facial image). It is used only for identity/location verification and is not used for any other purpose such as profiling or facial recognition matching.</p>
+      <p class="mt-2"><strong>4. Who can access it</strong><br>Only authorised VMM Central Operations &amp; Business Intelligence admin users. Data is stored on Google Firebase (Firestore) under VMM's account.</p>
+      <p class="mt-2"><strong>5. Retention &amp; deletion</strong><br>Submission photos are purged on a rolling, admin-triggered basis (typically anything older than the current review window, i.e. D-2 and earlier). Text/audit records (timestamps, GPS, responses) are retained for ongoing compliance and performance reporting in line with internal record-keeping needs.</p>
+      <p class="mt-2"><strong>6. Your rights</strong><br>You may request access to, correction of, or deletion of your personal data by writing to your Central Operations admin/contact. Reasonable requests will be actioned, subject to legitimate business/compliance retention needs.<br><a href="mailto:merchandise.support@vishalretail.co.in?subject=Data%20Access%2FDeletion%20Request%20-%20Daily%20Discipline%20Review%20App">Request data access / deletion →</a></p>
+      <p class="mt-2"><strong>7. Consent</strong><br>By checking "I agree" and continuing to use this app, you consent to the collection and use of your location and photo as described above. Camera and Location access requests by your browser are used strictly for this purpose and are not recorded or transmitted unless you submit a review.</p>
+      <p class="mt-2 text3">Last updated: June 2026.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline btn-full" onclick="closeOv('ovPolicy')">Close</button></div>
   </div>
 </div>
 
@@ -968,9 +1015,11 @@ function initAdmin(){
   // auto-seed both question sets if empty
   db.collection('questions').limit(1).get().then(function(s){
     if(s.empty){
-      var b=db.batch();
-      DEF_Q.concat(DEF_Q_STORE).forEach(function(q){ b.set(db.collection('questions').doc(),q); });
-      b.commit();
+      // DISABLED 2026-06-19: Auto-init causing duplicates. Seeding must be manual via admin panel.
+      // var b=db.batch();
+      // DEF_Q.concat(DEF_Q_STORE).forEach(function(q){ b.set(db.collection('questions').doc(),q); });
+      // b.commit();
+      console.warn('⚠ Questions collection is empty — admin must manually import defaults via Questions panel');
     }
   });
   navTo('dashboard');
@@ -2550,6 +2599,31 @@ function saveFillWindow(){
 // ════════════════════ OVERLAY + UTILS ════════════════════
 function showOv(id){ document.getElementById(id).classList.add('show'); }
 function closeOv(id){ document.getElementById(id).classList.remove('show'); }
+
+// ════════════════════ PRIVACY CONSENT GATE (additive — does not alter login/GPS/camera logic) ════════════════════
+// Shown once per device/browser before any screen is usable. Purely a transparent overlay on top of existing UI.
+var CONSENT_KEY='vmm_consent_v1';
+function openPolicy(){ showOv('ovPolicy'); }
+function hasConsent(){ try{ return !!localStorage.getItem(CONSENT_KEY); }catch(e){ return false; } }
+function acceptConsent(){
+  var ts=new Date().toISOString();
+  try{ localStorage.setItem(CONSENT_KEY, ts); }catch(e){}
+  closeOv('ovConsent');
+  // best-effort audit log — never blocks the user even if Firestore/network is unavailable
+  try{
+    var did='vmm_device_id';
+    var devId=null; try{ devId=localStorage.getItem(did); }catch(e){}
+    if(!devId){ devId='dev_'+Math.random().toString(36).slice(2)+Date.now().toString(36); try{ localStorage.setItem(did,devId); }catch(e){} }
+    if(typeof db!=='undefined'&&db&&db.collection){
+      db.collection('consents').add({deviceId:devId,acceptedAt:ts,appVersion:'v22.1',ua:(navigator.userAgent||'').slice(0,200)}).catch(function(){});
+    }
+  }catch(e){}
+}
+function showConsentGateIfNeeded(){
+  if(!hasConsent()){ showOv('ovConsent'); }
+}
+// Run after the rest of the script has initialised the UI, without altering any existing init/login/resume logic.
+setTimeout(showConsentGateIfNeeded,0);
 
 function toDateStr(d){ var m=(d.getMonth()+1),day=d.getDate(); return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(day<10?'0':'')+day; }
 function addDays(d,n){ var x=new Date(d); x.setDate(x.getDate()+n); return x; }
