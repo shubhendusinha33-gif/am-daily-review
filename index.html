@@ -481,6 +481,7 @@ select.form-control{cursor:pointer}
       <div class="sb-section">Tools</div>
       <div class="nav-item" data-pg="storeview" onclick="navTo('storeview')"><span class="nav-icon">👁</span> User View</div>
       <div class="nav-item" data-pg="emailpush" onclick="navTo('emailpush')"><span class="nav-icon">📧</span> Email Push</div>
+      <div class="nav-item" data-pg="consentlog" onclick="navTo('consentlog')"><span class="nav-icon">🔒</span> Consent Log</div>
       <div class="nav-item" data-pg="settings" onclick="navTo('settings')"><span class="nav-icon">⚙️</span> Settings</div>
     </nav>
     <div class="sb-footer">Designed & Developed by<br>Shubhendu Sinha<br>VMM Central Operations & BI</div>
@@ -518,6 +519,7 @@ select.form-control{cursor:pointer}
           <select class="filter-input" id="dFinal" onchange="renderDashFiltered()"><option value="">All</option><option value="submitted">Submitted</option><option value="pending">Pending</option></select>
           <span class="filter-lbl">Completion</span>
           <select class="filter-input" id="dComp" onchange="renderDashFiltered()"><option value="">All</option><option value="100">100%</option><option value="95">95–99%</option><option value="lt95">&lt;95%</option></select>
+          <button class="btn btn-green btn-sm" onclick="exportFullExcel()">📊 Full Excel Export (Summary + Per-Question Sheets)</button>
           <button class="btn btn-purple btn-sm" onclick="openMCLog()" style="margin-left:auto">📒 MC Log (GC/NOH/Zero/PI)</button>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
@@ -657,6 +659,34 @@ select.form-control{cursor:pointer}
         </div>
       </div>
 
+      <!-- CONSENT LOG -->
+      <div id="pageConsentlog" class="a-page">
+        <div class="info-box">🔒 Audit trail of Privacy Policy consent acceptances (device-level) and identity logins (who/what/when). Use this to demonstrate compliance if ever asked.</div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Filters</span>
+          </div>
+          <div class="card-body">
+            <div class="flex gap wrap center">
+              <button class="btn btn-blue btn-sm" onclick="loadConsentLog('today')">Today</button>
+              <button class="btn btn-outline btn-sm" onclick="loadConsentLog('7')">Last 7 days</button>
+              <button class="btn btn-outline btn-sm" onclick="loadConsentLog('30')">Last 30 days</button>
+              <button class="btn btn-outline btn-sm" onclick="loadConsentLog('all')">All</button>
+              <input class="form-control" id="clSearch" placeholder="Search Emp Code / Name / Store Code…" style="max-width:260px" oninput="renderConsentLog()">
+              <button class="btn btn-green btn-sm" onclick="exportConsentLogCSV()">⬇ Export CSV</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Consent Acceptances</span><span class="badge badge-blue" id="clConsentCount">0</span></div>
+          <div class="card-body tbl-wrap"><table class="tbl"><thead><tr><th>Device ID</th><th>Accepted At</th><th>App Version</th><th>Browser</th></tr></thead><tbody id="clConsentBody"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Store Login Identities (Selfie + Emp Code/Name)</span><span class="badge badge-pink" id="clStoreCount">0</span></div>
+          <div class="card-body tbl-wrap"><table class="tbl"><thead><tr><th>Store</th><th>Date</th><th>Emp Code</th><th>Name</th><th>Dist from Store</th><th>Captured At</th><th>Photo</th></tr></thead><tbody id="clStoreBody"></tbody></table></div>
+        </div>
+      </div>
+
       <!-- SETTINGS -->
       <div id="pageSettings" class="a-page">
         <div class="card">
@@ -721,6 +751,34 @@ select.form-control{cursor:pointer}
 <div class="overlay" id="ovGpsReq"><div class="modal"><div class="modal-head"><span class="modal-title">📍 Location Required</span><button class="modal-x" onclick="closeOv('ovGpsReq')">×</button></div><div class="modal-body"><p style="color:var(--text2);line-height:1.6">Location permission is mandatory to fill the checklist. Please enable Location/GPS for this site in your browser, ensure you are physically at the store, then reopen.</p></div><div class="modal-foot"><button class="btn btn-blue" onclick="closeOv('ovGpsReq')">OK</button></div></div></div>
 
 <div class="overlay" id="ovSelfie"><div class="modal"><div class="modal-head"><span class="modal-title">🤳 AM Verification Selfie</span></div><div class="modal-body"><p class="small text2" style="margin-bottom:8px">Mandatory for AM login. Your geo-tagged selfie is captured to verify it's really you.</p><video id="selfieVid" autoplay playsinline muted style="width:100%;border-radius:10px;background:#000;max-height:46vh"></video><canvas id="selfieCan" class="hidden"></canvas><div id="selfieGeo" class="small text3" style="margin-top:6px">📍 getting location…</div></div><div class="modal-foot"><button class="btn btn-outline" onclick="cancelSelfie()">Cancel</button><button class="btn btn-pink" id="selfieBtn" onclick="captureAMSelfie()">📸 Capture &amp; Login</button></div></div></div>
+
+<!-- ═══ STORE LOGIN: selfie (in-store only) → then Emp Code/Name identity ═══ -->
+<div class="overlay" id="ovStoreSelfie"><div class="modal">
+  <div class="modal-head"><span class="modal-title">🤳 Store Login Verification</span></div>
+  <div id="storeSelfieStage1" class="modal-body">
+    <p class="small text2" style="margin-bottom:8px">Mandatory for Store login. Capture is allowed only when you are physically at this store.</p>
+    <video id="storeSelfieVid" autoplay playsinline muted style="width:100%;border-radius:10px;background:#000;max-height:46vh"></video>
+    <canvas id="storeSelfieCan" class="hidden"></canvas>
+    <div id="ssGeo" class="small text3" style="margin-top:6px">📍 getting location…</div>
+  </div>
+  <div id="storeSelfieStage2" class="modal-body hidden">
+    <p class="small text2" style="margin-bottom:8px">Selfie captured. Now enter who is logging in today:</p>
+    <img id="ssPreviewImg" style="width:100%;border-radius:10px;margin-bottom:10px">
+    <div class="fd-box" style="margin:0 0 4px">
+      <div class="fd-t">👤 Who is filling today</div>
+      <div class="fd-g">
+        <div><div class="fd-l">Emp Code</div><input class="fd-i" id="ssEmpCode" placeholder="e.g. 12345" oninput="checkStoreIdentityReady()"></div>
+        <div><div class="fd-l">Name</div><input class="fd-i" id="ssEmpName" placeholder="Full name" oninput="checkStoreIdentityReady()"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-outline" onclick="cancelStoreSelfie()">Cancel</button>
+    <button class="btn btn-pink" id="ssCapBtn" onclick="captureStoreSelfie()" style="display:inline-block">📸 Capture Selfie</button>
+    <button class="btn btn-outline" id="ssRetakeBtn" onclick="retakeStoreSelfie()" style="display:none">🔄 Retake</button>
+    <button class="btn btn-pink" id="ssConfirmBtn" onclick="confirmStoreLogin()" disabled style="display:none">✓ Confirm &amp; Login</button>
+  </div>
+</div></div>
 
 <div class="overlay" id="ovSkip"><div class="modal"><div class="modal-head"><span class="modal-title">⏭ Skip Store</span><button class="modal-x" onclick="closeOv('ovSkip')">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Reason for skipping *</label><textarea class="form-control" id="skipReason" rows="4" placeholder="Minimum 10 characters…"></textarea><div id="skipErr" class="small" style="color:var(--red);margin-top:4px;display:none">Please enter at least 10 characters.</div></div></div><div class="modal-foot"><button class="btn btn-outline" onclick="closeOv('ovSkip')">Cancel</button><button class="btn btn-pink" onclick="confirmSkip()">Confirm Skip</button></div></div></div>
 
@@ -846,8 +904,8 @@ function tryAnonAuth(){
   });
 }
 var SCREENS=['scrLogin','scrMobile','scrReview','scrSuccess','scrAdmin','scrMaint'];
-var PAGES=['dashboard','submissions','stores','questions','storeview','emailpush','settings'];
-var PAGE_TITLES={dashboard:'Dashboard',submissions:'Submissions',stores:'Stores',questions:'Questions',storeview:'User View',emailpush:'Email Push',settings:'Settings'};
+var PAGES=['dashboard','submissions','stores','questions','storeview','emailpush','consentlog','settings'];
+var PAGE_TITLES={dashboard:'Dashboard',submissions:'Submissions',stores:'Stores',questions:'Questions',storeview:'User View',emailpush:'Email Push',consentlog:'Consent Log',settings:'Settings'};
 // Show the UI IMMEDIATELY — never block on the network (fixes blank screen on other devices/networks).
 (function initUI(){
   paintLogos();
@@ -908,8 +966,7 @@ function doLogin(){
     if(!/^[A-Za-z]{2}\d{2}$/.test(code)){ err.textContent='Store code looks like HA04 (2 letters + 2 digits).'; err.style.display=''; return; }
     requestPerms(function(ok,msg){
       if(!ok){ err.textContent=msg||'Camera & Location permission are mandatory.'; err.style.display=''; return; }
-      gProfile={role:'STORE',code:code,storeCode:code,name:'Store '+code};
-      sessionStorage_set(gProfile); startMobile('STORE');
+      startStoreSelfie(code);
     });
     return;
   }
@@ -973,6 +1030,113 @@ function captureAMSelfie(){
   db.collection('amselfies').doc(code+'_'+sd).set({amCode:code,reviewDate:sd,photo:data,latitude:g?g.lat:null,longitude:g?g.lng:null,at:firebase.firestore.FieldValue.serverTimestamp()})
   .then(function(){ hideLoader(); stopSelfieStream(); closeOv('ovSelfie'); gProfile={role:'AM',code:code,amCode:code,name:'AM '+code,amLeaveCO:onLeave,amBypassType:gSelfieCtx.btype||''}; sessionStorage_set(gProfile); startMobile('AM'); })
   .catch(function(e){ hideLoader(); showToast(e.message); });
+}
+
+// ════════════════════ STORE LOGIN: mandatory selfie + GPS (in-store only) + Emp Code/Name identity ════════════════════
+var gStoreSelfieStream=null,gStoreSelfieWatch=null,gStoreSelfieCtx={};
+function startStoreSelfie(code){
+  gStoreSelfieCtx={code:code,geo:null,storeLat:null,storeLng:null,captured:false};
+  var err=document.getElementById('loginErr');
+  if(!navigator.mediaDevices){
+    // No camera (e.g. desktop testing) — graceful fallback, same pattern as AM
+    gProfile={role:'STORE',code:code,storeCode:code,name:'Store '+code};
+    sessionStorage_set(gProfile); startMobile('STORE'); return;
+  }
+  document.getElementById('storeSelfieStage1').classList.remove('hidden');
+  document.getElementById('storeSelfieStage2').classList.add('hidden');
+  document.getElementById('ssEmpCode').value=''; document.getElementById('ssEmpName').value='';
+  document.getElementById('ssCapBtn').style.display='inline-block';
+  document.getElementById('ssRetakeBtn').style.display='none';
+  document.getElementById('ssConfirmBtn').style.display='none';
+  showOv('ovStoreSelfie');
+  document.getElementById('ssGeo').textContent='📍 getting location…';
+  var btn=document.getElementById('ssCapBtn');
+  if(btn){ btn.disabled=true; btn.style.opacity='0.5'; btn.textContent='📍 Waiting for GPS…'; }
+  // look up this store's coordinates so we can enforce in-store-only capture
+  db.collection('stores').where('storeCode','==',code).limit(1).get().then(function(snap){
+    if(!snap.empty){ var sd=snap.docs[0].data(); gStoreSelfieCtx.storeLat=sd.latitude||null; gStoreSelfieCtx.storeLng=sd.longitude||null; }
+  }).catch(function(){});
+  if(navigator.geolocation){
+    gStoreSelfieWatch=navigator.geolocation.watchPosition(function(p){
+      gStoreSelfieCtx.geo={lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)};
+      updateStoreSelfieRange();
+    },function(){ document.getElementById('ssGeo').textContent='📍 location unavailable — enable GPS and wait'; },{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+  } else { document.getElementById('ssGeo').textContent='📍 GPS not supported on this device'; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(function(stream){
+    gStoreSelfieStream=stream; var v=document.getElementById('storeSelfieVid'); v.srcObject=stream;
+  }).catch(function(){ closeOv('ovStoreSelfie'); err.textContent='Camera permission is mandatory for Store login.'; err.style.display=''; });
+}
+function updateStoreSelfieRange(){
+  var g=gStoreSelfieCtx.geo, btn=document.getElementById('ssCapBtn'), geoEl=document.getElementById('ssGeo');
+  if(!g) return;
+  var R=(gConfig.gpsRadius||100)+Math.min(g.acc||0,200);
+  if(gStoreSelfieCtx.storeLat && gStoreSelfieCtx.storeLng){
+    var d=haversine(g.lat,g.lng,gStoreSelfieCtx.storeLat,gStoreSelfieCtx.storeLng);
+    gStoreSelfieCtx.dist=d;
+    if(!gConfig.testMode && d>R){
+      geoEl.textContent='📍 '+fmtDist(d)+' from this store — move within '+(gConfig.gpsRadius||100)+'m to capture (±'+g.acc+'m)';
+      btn.disabled=true; btn.style.opacity='0.5'; btn.textContent='📍 Move closer to store…';
+      return;
+    }
+  }
+  geoEl.textContent='📍 '+g.lat.toFixed(5)+', '+g.lng.toFixed(5)+' (±'+g.acc+'m)'+(gStoreSelfieCtx.dist!=null?' · '+fmtDist(gStoreSelfieCtx.dist)+' from store':'');
+  btn.disabled=false; btn.style.opacity='1'; btn.textContent='📸 Capture Selfie';
+}
+function stopStoreSelfieStream(){ if(gStoreSelfieStream){ gStoreSelfieStream.getTracks().forEach(function(t){t.stop();}); gStoreSelfieStream=null; } if(gStoreSelfieWatch!=null&&navigator.geolocation){ navigator.geolocation.clearWatch(gStoreSelfieWatch); gStoreSelfieWatch=null; } }
+function cancelStoreSelfie(){ stopStoreSelfieStream(); closeOv('ovStoreSelfie'); }
+function captureStoreSelfie(){
+  var v=document.getElementById('storeSelfieVid'); if(!v||!v.videoWidth){ showToast('Camera not ready'); return; }
+  if(!gConfig.testMode && !gStoreSelfieCtx.geo){ showToast('Waiting for GPS — please wait for the location to appear'); return; }
+  if(!gConfig.testMode && gStoreSelfieCtx.storeLat && gStoreSelfieCtx.dist!=null){
+    var R=(gConfig.gpsRadius||100)+Math.min((gStoreSelfieCtx.geo&&gStoreSelfieCtx.geo.acc)||0,200);
+    if(gStoreSelfieCtx.dist>R){ showToast('You are not at the store yet — capture is in-store only'); return; }
+  }
+  var W=Math.min(v.videoWidth,640),H=Math.round(v.videoHeight*(W/v.videoWidth));
+  var c=document.getElementById('storeSelfieCan'); c.width=W; c.height=H;
+  var ctx=c.getContext('2d'); ctx.drawImage(v,0,0,W,H);
+  var g=gStoreSelfieCtx.geo;
+  var stamp=new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true})+(g?' · '+g.lat.toFixed(4)+','+g.lng.toFixed(4):'');
+  ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(0,H-22,W,22); ctx.fillStyle='#fff'; ctx.font='11px Arial'; ctx.fillText(gStoreSelfieCtx.code+' · '+stamp,6,H-7);
+  var q=0.82,data; do{ data=c.toDataURL('image/jpeg',q); q-=0.1; }while(data.length>90000&&q>0.3);
+  gStoreSelfieCtx.photo=data; gStoreSelfieCtx.captured=true;
+  stopStoreSelfieStream();
+  document.getElementById('storeSelfieStage1').classList.add('hidden');
+  document.getElementById('storeSelfieStage2').classList.remove('hidden');
+  document.getElementById('ssPreviewImg').src=data;
+  document.getElementById('ssCapBtn').style.display='none';
+  document.getElementById('ssRetakeBtn').style.display='inline-block';
+  document.getElementById('ssConfirmBtn').style.display='inline-block';
+  checkStoreIdentityReady();
+}
+function checkStoreIdentityReady(){
+  var ec=(document.getElementById('ssEmpCode').value||'').trim(), nm=(document.getElementById('ssEmpName').value||'').trim();
+  document.getElementById('ssConfirmBtn').disabled=!(ec && nm);
+}
+function retakeStoreSelfie(){
+  document.getElementById('storeSelfieStage1').classList.remove('hidden');
+  document.getElementById('storeSelfieStage2').classList.add('hidden');
+  document.getElementById('ssCapBtn').style.display='inline-block';
+  document.getElementById('ssRetakeBtn').style.display='none';
+  document.getElementById('ssConfirmBtn').style.display='none';
+  gStoreSelfieCtx.captured=false;
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(function(stream){
+    gStoreSelfieStream=stream; var v=document.getElementById('storeSelfieVid'); v.srcObject=stream;
+  }).catch(function(){});
+}
+function confirmStoreLogin(){
+  var ec=(document.getElementById('ssEmpCode').value||'').trim(), nm=(document.getElementById('ssEmpName').value||'').trim();
+  if(!ec||!nm){ showToast('Enter Emp Code and Name'); return; }
+  var code=gStoreSelfieCtx.code, g=gStoreSelfieCtx.geo, sd=toDateStr(addDays(new Date(),-1));
+  showLoader('Verifying…');
+  db.collection('storeselfies').doc(code+'_'+sd+'_'+Date.now()).set({
+    storeCode:code,reviewDate:sd,photo:gStoreSelfieCtx.photo||null,
+    latitude:g?g.lat:null,longitude:g?g.lng:null,distFromStore:gStoreSelfieCtx.dist!=null?gStoreSelfieCtx.dist:null,
+    empCode:ec,empName:nm,at:firebase.firestore.FieldValue.serverTimestamp()
+  }).then(function(){
+    hideLoader(); closeOv('ovStoreSelfie');
+    gProfile={role:'STORE',code:code,storeCode:code,name:nm,empCode:ec,empName:nm};
+    sessionStorage_set(gProfile); startMobile('STORE');
+  }).catch(function(e){ hideLoader(); showToast(e.message); });
 }
 
 function resumeSession(sess){
@@ -1086,6 +1250,7 @@ function navTo(pg){
   if(pg==='questions') loadQuestions();
   if(pg==='storeview') loadPreview();
   if(pg==='emailpush') {}
+  if(pg==='consentlog') loadConsentLog('today');
   if(pg==='settings') loadSettings();
 }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
@@ -1456,14 +1621,18 @@ function openStore(code){
   if(needGPS && !gConfig.testMode && !gGPS){ showOv('ovGpsReq'); return; }
   var R=(gConfig.gpsRadius||100)+((gGPS&&gGPS.acc)?Math.min(gGPS.acc,200):0);
   if(!gConfig.testMode && gGPS && !(gReview.type==='AM'&&gProfile.amLeaveCO)){
-    var inRange=false, nearD=null;
+    var inRange=false, nearD=null, noGpsCount=0;
     if(gReview.type==='AM'){
       // AM may open/re-write ANY of his stores as long as he is at ANY one of his stores
-      gStores.forEach(function(s2){ if(s2.latitude&&s2.longitude){ var dd=haversine(gGPS.lat,gGPS.lng,s2.latitude,s2.longitude); if(nearD==null||dd<nearD)nearD=dd; if(dd<=R)inRange=true; } });
+      gStores.forEach(function(s2){ if(s2.latitude&&s2.longitude){ var dd=haversine(gGPS.lat,gGPS.lng,s2.latitude,s2.longitude); if(nearD==null||dd<nearD)nearD=dd; if(dd<=R)inRange=true; } else { noGpsCount++; } });
     } else if(st.latitude && st.longitude){
       nearD=haversine(gGPS.lat,gGPS.lng,st.latitude,st.longitude); if(nearD<=R)inRange=true;
     } else { inRange=true; }
-    if(!inRange){ document.getElementById('rangeDetail').textContent='You are '+fmtDist(nearD)+' from your nearest store · need ≤'+(gConfig.gpsRadius||100)+'m of '+(gReview.type==='AM'?'any of your stores':'this store'); showOv('ovRange'); return; }
+    if(!inRange){
+      var diag='You are '+fmtDist(nearD)+' from your nearest store · need ≤'+(gConfig.gpsRadius||100)+'m of '+(gReview.type==='AM'?'any of your stores':'this store');
+      if(gReview.type==='AM' && noGpsCount>0) diag+=' · ⚠ '+noGpsCount+' of your '+gStores.length+' mapped store(s) have no GPS coordinates on file (excluded from this check — ask admin to add lat/long in Store Mapping)';
+      document.getElementById('rangeDetail').textContent=diag; showOv('ovRange'); return;
+    }
   }
   startReview(st);
 }
@@ -1537,6 +1706,27 @@ function renderReview(){
       });
       html+=(fd.mcs.length<5?'<button class="btn btn-outline btn-sm" onclick="addMC('+i+')">+ Add MC</button> ':'')+'<button class="btn btn-blue btn-sm" onclick="saveFD('+i+')">Save Details</button></div>';
     }
+    if(gReview.type==='STORE' && i===0 && (st==='c'||st==='nc')){
+      var oc=(a.fd&&a.fd.openClose)||{};
+      html+='<div class="fd-box"><div class="fd-t">🔓🔒 Store Open / Close — Yesterday</div>'+
+        '<div class="small" style="font-weight:700;color:var(--blue-d);margin-bottom:4px">Opened by</div>'+
+        '<div class="fd-g" style="margin-bottom:10px">'+
+          '<div><div class="fd-l">Name</div><input class="fd-i" id="ocON'+i+'" value="'+esc(oc.openName||'')+'" onblur="saveOC('+i+')"></div>'+
+          '<div><div class="fd-l">Designation</div><select class="fd-i" id="ocOD'+i+'" onchange="saveOC('+i+')">'+
+            ['','SM','ASM','DM'].map(function(d){return '<option value="'+d+'"'+(oc.openDesg===d?' selected':'')+'>'+(d||'Select')+'</option>';}).join('')+
+          '</select></div>'+
+          '<div style="grid-column:1/-1"><div class="fd-l">Time Opened</div><input class="fd-i" id="ocOT'+i+'" type="time" value="'+esc(oc.openTime||'')+'" onchange="saveOC('+i+')"></div>'+
+        '</div>'+
+        '<div class="small" style="font-weight:700;color:var(--blue-d);margin-bottom:4px">Closed by</div>'+
+        '<div class="fd-g">'+
+          '<div><div class="fd-l">Name</div><input class="fd-i" id="ocCN'+i+'" value="'+esc(oc.closeName||'')+'" onblur="saveOC('+i+')"></div>'+
+          '<div><div class="fd-l">Designation</div><select class="fd-i" id="ocCD'+i+'" onchange="saveOC('+i+')">'+
+            ['','SM','ASM','DM'].map(function(d){return '<option value="'+d+'"'+(oc.closeDesg===d?' selected':'')+'>'+(d||'Select')+'</option>';}).join('')+
+          '</select></div>'+
+          '<div style="grid-column:1/-1"><div class="fd-l">Time Closed</div><input class="fd-i" id="ocCT'+i+'" type="time" value="'+esc(oc.closeTime||'')+'" onchange="saveOC('+i+')"></div>'+
+        '</div>'+
+      '</div>';
+    }
     if(q.requiresPhoto && st==='c'){
       html+='<div class="ph-box">'+(a.photo?'<img class="ph-img" src="'+a.photo+'"><button class="btn btn-outline btn-sm btn-full" onclick="openCam(\'q'+i+'\')">🔄 Retake</button>':'<div class="ph-drop" onclick="openCam(\'q'+i+'\')">📷<div class="small text2 mt-2">Tap to take required photo</div></div>')+'</div>';
     }
@@ -1549,6 +1739,17 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function enlargeImg(src){ var lb=document.getElementById('imgLightbox'); document.getElementById('imgLightboxImg').src=src; lb.style.display='flex'; }
 function setAns(i,s){ gReview.answers[i].status=s; renderReview(); setTimeout(function(){var e=document.getElementById('qc'+i);if(e)e.scrollIntoView({behavior:'smooth',block:'nearest'});},50); }
 function saveRem(i){ var e=document.getElementById('rem'+i); if(e) gReview.answers[i].remarks=e.value; }
+function saveOC(i){
+  var a=gReview.answers[i]; if(!a.fd) a.fd={};
+  a.fd.openClose={
+    openName:(document.getElementById('ocON'+i)||{}).value||'',
+    openDesg:(document.getElementById('ocOD'+i)||{}).value||'',
+    openTime:(document.getElementById('ocOT'+i)||{}).value||'',
+    closeName:(document.getElementById('ocCN'+i)||{}).value||'',
+    closeDesg:(document.getElementById('ocCD'+i)||{}).value||'',
+    closeTime:(document.getElementById('ocCT'+i)||{}).value||''
+  };
+}
 function collectMC(i){ var a=gReview.answers[i]; if(!a.fd||!Array.isArray(a.fd.mcs)) return; a.fd.mcs=a.fd.mcs.map(function(m,j){ var s=parseFloat((document.getElementById('fdSQ'+i+'_'+j)||{}).value)||0,p=parseFloat((document.getElementById('fdPQ'+i+'_'+j)||{}).value)||0; return {mcCd:(document.getElementById('fdMC'+i+'_'+j)||{}).value||'',desc:(document.getElementById('fdDS'+i+'_'+j)||{}).value||'',sysQty:(document.getElementById('fdSQ'+i+'_'+j)||{}).value||'',foundQty:(document.getElementById('fdPQ'+i+'_'+j)||{}).value||'',shrinkQty:(s-p),shrink:s>0?(((s-p)/s*100).toFixed(1)+'%'):''}; }); }
 function calcSh(i,j){ var s=parseFloat(document.getElementById('fdSQ'+i+'_'+j).value)||0,p=parseFloat(document.getElementById('fdPQ'+i+'_'+j).value)||0,e=document.getElementById('fdSH'+i+'_'+j),eq=document.getElementById('fdSQty'+i+'_'+j); var sq=s-p; if(e)e.textContent=s>0?((sq)/s*100).toFixed(1)+'%':'—'; if(eq)eq.textContent=(s||p)?sq:'—'; }
 function addMC(i){ collectMC(i); var a=gReview.answers[i]; if(!a.fd||!Array.isArray(a.fd.mcs))a.fd={mcs:[{}]}; if(a.fd.mcs.length<5)a.fd.mcs.push({}); renderReview(); }
@@ -1988,6 +2189,65 @@ function exportDashCSV(){
   });
   downloadCSV(rows,'Dashboard_'+(stf||'all')+'_'+toDateStr(new Date())+'.csv');
   showToast('Exported '+(rows.length-1)+' rows ('+(stf||'all')+')');
+}
+
+// ════════════════════ FULL EXCEL EXPORT — one .xlsx, Summary + one sheet per question ════════════════════
+function sheetNameSafe(name,used){
+  var s=String(name||'Sheet').replace(/[:\\\/\?\*\[\]]/g,' ').replace(/\s+/g,' ').trim().slice(0,28);
+  if(!s) s='Sheet';
+  var base=s,n=2;
+  while(used[s]){ s=(base+' '+n).slice(0,31); n++; }
+  used[s]=true;
+  return s;
+}
+function exportFullExcel(){
+  if(typeof XLSX==='undefined'){ showToast('Excel library not loaded'); return; }
+  var type=(document.getElementById('dType')||{}).value||'AM';
+  var subs=(gDashAllSubs||[]).filter(function(s){ return s.reviewType===type && !s.isSkipped; });
+  if(!subs.length){ showToast('No filled submissions for this date range/type'); return; }
+  var qs=(gAllQuestions||[]).filter(function(q){ return (q.reviewType||'AM')===type; }).sort(function(a,b){ return (a.sortOrder||0)-(b.sortOrder||0); });
+  if(!qs.length && type==='STORE') qs=(gAllQuestions||[]).filter(function(q){ return (q.reviewType||'AM')==='AM'; }).sort(function(a,b){ return (a.sortOrder||0)-(b.sortOrder||0); });
+  var totalStores=(gDashStores||[]).length;
+  var submittedCodes={}; subs.forEach(function(s){ submittedCodes[s.storeCode]=true; });
+  var ncCount=0; subs.forEach(function(s){ (s.answers||[]).forEach(function(a){ if(a.status==='nc') ncCount++; }); });
+  var comps=subs.map(function(s){ return s.overallCompliance||0; });
+  var avg=comps.length?Math.round(comps.reduce(function(a,b){ return a+b; },0)/comps.length):0;
+  var from=(document.getElementById('dFrom')||{}).value||'', to=(document.getElementById('dTo')||{}).value||'';
+  var wb=XLSX.utils.book_new();
+  var sumRows=[
+    ['VMM Daily Discipline Review — Full Export'],
+    ['Generated',new Date().toLocaleString('en-IN')],
+    ['Review Type',type],
+    ['Date Range',from+' to '+to],
+    [],
+    ['Total Stores',totalStores],
+    ['Submitted (Filled)',Object.keys(submittedCodes).length],
+    ['Avg Compliance %',avg],
+    ['Total Non-Compliant Answers',ncCount],
+    ['Questions Exported',qs.length]
+  ];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumRows),'Summary');
+  var used={'Summary':true};
+  qs.forEach(function(q,qi){
+    var hasOC=false,hasMC=false;
+    subs.forEach(function(s){ (s.answers||[]).forEach(function(a){ if(String(a.questionId)===String(q.id)){ if(a.fd&&a.fd.openClose) hasOC=true; if(a.fd&&(a.fd.mcs||a.fd.mcCd)) hasMC=true; } }); });
+    var head=['StoreCode','StoreName','AM Code','AM Name','Status','Remarks'];
+    if(hasOC) head=head.concat(['Opened By','Open Designation','Open Time','Closed By','Close Designation','Close Time']);
+    if(hasMC) head=head.concat(['MC Code','Description','Sys Qty','Found Qty','Shrink %']);
+    var rows=[head];
+    subs.forEach(function(s){
+      var a=(s.answers||[]).find(function(x){ return String(x.questionId)===String(q.id); });
+      if(!a) return;
+      var row=[s.storeCode,s.storeName||'',s.amCode||'',s.amName||'',a.status==='c'?'Compliant':a.status==='nc'?'Non-Compliant':a.status==='na'?'NA':'',a.remarks||''];
+      if(hasOC){ var oc=(a.fd&&a.fd.openClose)||{}; row=row.concat([oc.openName||'',oc.openDesg||'',oc.openTime||'',oc.closeName||'',oc.closeDesg||'',oc.closeTime||'']); }
+      if(hasMC){ var mcs=a.fd?(Array.isArray(a.fd.mcs)?a.fd.mcs:[a.fd]):[]; var m0=mcs[0]||{}; row=row.concat([m0.mcCd||'',m0.desc||'',m0.sysQty||'',m0.foundQty||'',m0.shrink||'']); }
+      rows.push(row);
+    });
+    var name=sheetNameSafe('Q'+(qi+1)+'_'+(q.sectionTitle||''),used);
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),name);
+  });
+  XLSX.writeFile(wb,'VMM_FullExport_'+type+'_'+toDateStr(new Date())+'.xlsx');
+  showToast('Excel exported · '+qs.length+' question sheets ✓');
 }
 
 // ════════════════════ SUBMISSIONS ════════════════════
@@ -2558,6 +2818,52 @@ function sendViaOutlook(){
 function sendTestEmail(){ genEml(DEFAULT_FROM,''); }
 
 // ════════════════════ SETTINGS ════════════════════
+// ════════════════════ CONSENT LOG (ADMIN) ════════════════════
+var gConsentRows=[],gStoreSelfieRows=[];
+function loadConsentLog(range){
+  showLoader('Loading…');
+  var cutoff=null;
+  if(range==='today') cutoff=toDateStr(new Date());
+  else if(range==='7') cutoff=toDateStr(addDays(new Date(),-7));
+  else if(range==='30') cutoff=toDateStr(addDays(new Date(),-30));
+  Promise.all([
+    db.collection('consents').orderBy('acceptedAt','desc').limit(500).get(),
+    db.collection('storeselfies').orderBy('at','desc').limit(500).get()
+  ]).then(function(res){
+    gConsentRows=res[0].docs.map(function(d){ return d.data(); });
+    gStoreSelfieRows=res[1].docs.map(function(d){ return d.data(); });
+    if(cutoff){
+      gConsentRows=gConsentRows.filter(function(r){ return (r.acceptedAt||'').slice(0,10)>=cutoff; });
+      gStoreSelfieRows=gStoreSelfieRows.filter(function(r){ return (r.reviewDate||'')>=cutoff; });
+    }
+    hideLoader(); renderConsentLog();
+  }).catch(function(e){ hideLoader(); showToast(e.message); });
+}
+function renderConsentLog(){
+  var q=(document.getElementById('clSearch').value||'').toLowerCase();
+  var cRows=gConsentRows.filter(function(r){ return !q || (r.deviceId||'').toLowerCase().indexOf(q)>-1; });
+  document.getElementById('clConsentCount').textContent=cRows.length;
+  document.getElementById('clConsentBody').innerHTML=cRows.map(function(r){
+    return '<tr><td class="mono small">'+(r.deviceId||'—')+'</td><td>'+(r.acceptedAt||'—')+'</td><td>'+(r.appVersion||'—')+'</td><td class="small text2">'+(r.ua||'—')+'</td></tr>';
+  }).join('')||'<tr><td colspan="4" class="text3" style="text-align:center">No records</td></tr>';
+  var sRows=gStoreSelfieRows.filter(function(r){
+    if(!q) return true;
+    return (r.empCode||'').toLowerCase().indexOf(q)>-1 || (r.empName||'').toLowerCase().indexOf(q)>-1 || (r.storeCode||'').toLowerCase().indexOf(q)>-1;
+  });
+  document.getElementById('clStoreCount').textContent=sRows.length;
+  document.getElementById('clStoreBody').innerHTML=sRows.map(function(r){
+    var at=r.at&&r.at.toDate?r.at.toDate().toLocaleString('en-IN'):'—';
+    return '<tr><td>'+(r.storeCode||'—')+'</td><td>'+(r.reviewDate||'—')+'</td><td>'+(r.empCode||'—')+'</td><td>'+(r.empName||'—')+'</td><td>'+(r.distFromStore!=null?fmtDist(r.distFromStore):'—')+'</td><td class="small">'+at+'</td><td>'+(r.photo?'<a href="javascript:void(0)" onclick="enlargeImg(\''+r.photo+'\')">View</a>':'—')+'</td></tr>';
+  }).join('')||'<tr><td colspan="7" class="text3" style="text-align:center">No records</td></tr>';
+}
+function exportConsentLogCSV(){
+  var rows=[['Type','DeviceId/StoreCode','EmpCode','Name','Date/AcceptedAt','DistFromStore','AppVersion/Browser']];
+  gConsentRows.forEach(function(r){ rows.push(['Consent',r.deviceId||'',r.appVersion||'','',r.acceptedAt||'','',r.ua||'']); });
+  gStoreSelfieRows.forEach(function(r){ rows.push(['StoreLogin',r.storeCode||'',r.empCode||'',r.empName||'',r.reviewDate||'',r.distFromStore!=null?r.distFromStore:'','']); });
+  downloadCSV(rows,'VMM_ConsentLog_'+toDateStr(new Date())+'.csv');
+  showToast('CSV downloaded');
+}
+
 function loadSettings(){
   document.getElementById('cfgTestMode').checked=gConfig.testMode;
   document.getElementById('cfgTestMail').value=gConfig.testMail||DEFAULT_FROM;
